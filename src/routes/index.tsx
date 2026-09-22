@@ -18,9 +18,13 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import logoAsset from "../assets/relo-mofix-logo-new.png.asset.json";
-import wavesAsset from "../assets/relo-mofix-hero-new.jpg.asset.json";
-import hussainAsset from "../assets/hussain-keton.jpg.asset.json";
+import logoUrl from "../assets/relo-mofix-logo-new.png";
+import wavesUrl from "../assets/relo-mofix-hero-new.jpg";
+import hussainUrl from "../assets/hussain-keton.jpg";
+
+const logoAsset = { url: logoUrl };
+const wavesAsset = { url: wavesUrl };
+const hussainAsset = { url: hussainUrl };
 
 export const Route = createFileRoute("/")({
   head: () => ({
