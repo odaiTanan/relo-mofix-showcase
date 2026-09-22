@@ -18,8 +18,8 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import logoAsset from "../assets/relo-mofix-logo.jpg.asset.json";
-import wavesAsset from "../assets/relo-mofix-waves.jpg.asset.json";
+import logoAsset from "../assets/relo-mofix-logo-new.png.asset.json";
+import wavesAsset from "../assets/relo-mofix-hero-new.jpg.asset.json";
 import hussainAsset from "../assets/hussain-keton.jpg.asset.json";
 
 export const Route = createFileRoute("/")({
@@ -79,6 +79,7 @@ function Index() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [language, setLanguage] = useState<"ar" | "en">("ar");
   const [filter, setFilter] = useState("all");
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
@@ -89,6 +90,13 @@ function Index() {
     document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
   }, [language]);
 
+  useEffect(() => {
+    const updateHeader = () => setScrolled(window.scrollY > 32);
+    updateHeader();
+    window.addEventListener("scroll", updateHeader, { passive: true });
+    return () => window.removeEventListener("scroll", updateHeader);
+  }, []);
+
   const t = copy[language];
   const filterKeys = ["all", "branding", "editorial", "social", "production"];
   const visibleWork = filter === "all" ? work : work.filter((item) => item.type === filter);
@@ -96,7 +104,7 @@ function Index() {
 
   return (
     <main dir={isArabic ? "rtl" : "ltr"} className={`site-main min-h-screen overflow-hidden bg-background text-foreground ${isArabic ? "lang-ar" : "lang-en"}`}>
-      <header className="site-header">
+      <header className={`site-header ${scrolled || menuOpen ? "header-scrolled" : "header-at-top"}`}>
         <a href="#home" className="brand" aria-label="RELO & MOFIX">
           <img src={logoAsset.url} alt="RELO & MOFIX logo" />
           <span>RELO <b>&</b> MOFIX</span>
