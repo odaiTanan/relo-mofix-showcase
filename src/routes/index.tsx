@@ -113,7 +113,7 @@ function Index() {
           {t.nav.map((label, index) => <a href={["#services", "#work", "#management", "#contact"][index]} onClick={() => setMenuOpen(false)} key={label}>{label}</a>)}
         </nav>
         <div className="header-actions">
-          <button type="button" className="language-toggle" onClick={() => { setLanguage(isArabic ? "en" : "ar"); setMenuOpen(false); }} aria-label={isArabic ? "Switch to English" : "التبديل إلى العربية"}>{isArabic ? "EN" : "ع"}</button>
+          <button type="button" className="language-toggle" onClick={() => { setLanguage(isArabic ? "en" : "ar"); setMenuOpen(false); }} aria-label={isArabic ? "Switch to English" : "التبديل إلى العربية"}>{isArabic ? "EN" : "AR"}</button>
           <IconButton label={dark ? t.light : t.dark} onClick={() => setDark(!dark)}>
             {dark ? <Sun size={19} /> : <Moon size={19} />}
           </IconButton>
