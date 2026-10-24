@@ -1,0 +1,17 @@
+{
+  "date": "2026-09-22T16:44:17.368Z",
+  "preset": "nitro-prerender",
+  "framework": {
+    "name": "nitro",
+    "version": "3.0.260603-beta"
+  },
+  "versions": {
+    "nitro": "3.0.260603-beta"
+  },
+  "serverEntry": "../../node_modules/.nitro/prerender/index.mjs",
+  "publicDir": "../../.output/public",
+  "commands": {
+    "preview": "npx serve ./static"
+  },
+  "config": {}
+}

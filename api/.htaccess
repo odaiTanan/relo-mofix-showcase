@@ -1,0 +1,46 @@
+# Disable directory browsing
+Options -Indexes
+
+# Protect sensitive files
+<FilesMatch "^(config\.php|database\.php|\.htaccess)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Prevent access to hidden files
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Enable CORS for API
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+    Header set Access-Control-Allow-Headers "Content-Type, Authorization"
+</IfModule>
+
+# Handle preflight requests
+RewriteEngine On
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteRule ^(.*)$ $1 [R=200,L]
+
+# Security headers
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "DENY"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    Header set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+</IfModule>
+
+# Limit file upload size
+LimitRequestBody 5242880
+
+# Prevent script execution in upload directory
+<Directory "*/uploads">
+    <FilesMatch "\.(php|phtml|php3|php4|php5|phps|html|htm|shtml)$">
+        Order allow,deny
+        Deny from all
+    </FilesMatch>
+</Directory>
