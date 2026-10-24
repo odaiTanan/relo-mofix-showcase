@@ -26,7 +26,7 @@ import Admin from "./pages/Admin";
 import { AboutContent, api, Category, ClientLogo, Testimonial } from "./lib/api";
 import logoUrl from "./assets/relo-mofix-logo-new.png";
 import wavesUrl from "./assets/relo-mofix-hero-new.jpg";
-import hussainUrl from "./assets/hussain-keton.jpg";
+import hussainUrl from "./assets/hussain-keton.PNG";
 
 const logoAsset = { url: logoUrl };
 const wavesAsset = { url: wavesUrl };
