@@ -32,9 +32,9 @@ hussain keton
 رقم التواصل 
 +963997596503
 الموقع
-reelo-agency.com
+relomofix.com
 الايميل
-info@reelo-agency.com
+info@relomofix.com
 اريد الموقع فخم فيه حركة وانيمشن واداءه عالي 
 واريد ان يكون قريب بالفكرة ل 
  للعربي استعمل خط Gulzar

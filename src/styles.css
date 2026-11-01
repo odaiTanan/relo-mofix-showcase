@@ -57,6 +57,8 @@ button { font: inherit; }
 .cursor-follower { position: fixed; top: -15px; left: -15px; z-index: 100; width: 30px; height: 30px; border: 1px solid color-mix(in oklab, var(--primary) 90%, white); border-radius: 50%; background: color-mix(in oklab, var(--primary) 10%, transparent); box-shadow: 0 0 0 1px color-mix(in oklab, var(--primary) 18%, transparent), 0 0 18px color-mix(in oklab, var(--primary) 24%, transparent); pointer-events: none; opacity: .9; transform: translate3d(-100px, -100px, 0); transition: width .2s ease, height .2s ease, top .2s ease, left .2s ease, opacity .2s ease, background-color .2s ease; }
 .cursor-follower::after { content: ""; position: absolute; top: 50%; left: 50%; width: 4px; height: 4px; border-radius: 50%; background: var(--primary); box-shadow: 0 0 8px var(--primary); transform: translate(-50%, -50%); }
 .site-main:has(a:hover) .cursor-follower, .site-main:has(button:hover) .cursor-follower { width: 46px; height: 46px; top: -23px; left: -23px; opacity: .7; background: color-mix(in oklab, var(--primary) 18%, transparent); }
+.site-main:has(.contact-section:hover) .cursor-follower { border-color: #000; background: rgb(0 0 0 / 10%); box-shadow: 0 0 0 1px rgb(0 0 0 / 18%), 0 0 18px rgb(0 0 0 / 24%); }
+.site-main:has(.contact-section:hover) .cursor-follower::after { background: #000; box-shadow: 0 0 8px #000; }
 
 .site-header { position: fixed; z-index: 50; top: 0; inset-inline: 0; height: 82px; padding: 0 5vw; display: flex; align-items: center; justify-content: space-between; color: var(--surface-deep-text); direction: ltr; transition: background-color .35s ease, border-color .35s ease, backdrop-filter .35s ease, box-shadow .35s ease; }
 .site-header.header-at-top { background: transparent; border-bottom: 1px solid transparent; backdrop-filter: blur(0); }
@@ -108,7 +110,7 @@ button { font: inherit; }
 .about-visual::after { content: "STUDIO / 01"; position: absolute; right: -18px; bottom: 24px; padding: 8px 14px; background: var(--primary); color: var(--primary-foreground); font: 10px var(--font-display); letter-spacing: .12em; }
 .about-visual img { width: 100%; height: 100%; min-height: 430px; display: block; object-fit: cover; filter: saturate(.9) contrast(1.06); transition: transform .7s cubic-bezier(.2,.75,.25,1), filter .7s ease; }
 .about-visual:hover img { transform: scale(1.04); }
-.service-row { min-height: 148px; display: grid; grid-template-columns: 55px 70px minmax(240px, 1fr) minmax(260px, 1fr) 40px; gap: 24px; align-items: center; border-bottom: 1px solid var(--border); transition: background .25s ease, padding .25s ease; }
+.service-row { min-height: 148px; display: grid; grid-template-columns: 55px 70px minmax(220px, 1fr) minmax(240px, 1fr) 118px; gap: 24px; align-items: center; border-bottom: 1px solid var(--border); transition: background .25s ease, padding .25s ease; }
 .service-row:hover { background: var(--card); padding-inline: 24px; }
 .service-number { color: var(--primary); font-family: var(--font-display); font-size: 12px; }
 .service-icon { width: 54px; height: 54px; border: 1px solid var(--border); display: grid; place-items: center; color: var(--primary); }
@@ -116,8 +118,9 @@ button { font: inherit; }
 .service-name h3 { font-size: 27px; line-height: 1.5; font-weight: 400; margin: 0; padding-block: .04em; }
 .service-name span { font-family: var(--font-display); font-size: 10px; color: var(--muted-foreground); }
 .service-row > p { color: var(--muted-foreground); line-height: 1.8; font-size: 16px; }
-.service-arrow { color: var(--muted-foreground); transition: .25s ease; }
-.service-row:hover .service-arrow { color: var(--primary); transform: translate(-5px, -5px); }
+.service-whatsapp { display: inline-flex; align-items: center; justify-content: center; gap: 7px; color: var(--muted-foreground); text-decoration: none; font-family: var(--font-display); font-size: 11px; transition: .25s ease; }
+.service-whatsapp svg { color: #25d366; }
+.service-whatsapp:hover { color: #25d366; transform: translateY(-2px); }
 
 .work-section { background: var(--secondary); }
 .work-filters { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
@@ -217,10 +220,14 @@ button { font: inherit; }
 .contact-circle svg { width: 36px; height: 36px; }
 .contact-details { border-top: 1px solid oklch(1 0 0 / 35%); padding-top: 38px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
 .contact-details a { display: flex; align-items: center; gap: 18px; color: inherit; text-decoration: none; }
+.contact-details a:hover { opacity: .78; }
+.contact-whatsapp svg { color: #075e54; }
 .contact-details svg { flex: 0 0 auto; }
 .contact-details span { display: flex; flex-direction: column; }
 .contact-details span > span { opacity: .7; }
 .contact-details strong { font-family: var(--font-display); font-size: 13px; font-weight: 400; word-break: break-word; }
+.whatsapp-floating { position: fixed; z-index: 45; bottom: 24px; inset-inline-end: 24px; width: 58px; height: 58px; display: grid; place-items: center; border-radius: 50%; background: #25d366; color: #fff; box-shadow: 0 8px 24px rgb(37 211 102 / 35%); text-decoration: none; transition: transform .25s ease, box-shadow .25s ease; }
+.whatsapp-floating:hover { transform: translateY(-4px) scale(1.04); box-shadow: 0 12px 30px rgb(37 211 102 / 48%); }
 footer { padding: 25px 5vw; display: flex; align-items: center; gap: 30px; background: var(--surface-deep); color: var(--surface-deep-muted); font-size: 13px; direction: ltr; }
 .footer-brand { color: var(--surface-deep-text); font-family: var(--font-display); margin-right: auto; }
 footer a { color: inherit; display: flex; gap: 8px; text-decoration: none; }
@@ -437,7 +444,7 @@ footer a { color: inherit; display: flex; gap: 8px; text-decoration: none; }
   .hero-aside { display: none; }
   .section { padding: 85px 5vw; }
   .section-heading { align-items: start; flex-direction: column; margin-bottom: 45px; }
-  .service-row { grid-template-columns: 36px 52px 1fr 25px; min-height: 125px; gap: 13px; }
+  .service-row { grid-template-columns: 36px 52px 1fr 100px; min-height: 125px; gap: 13px; }
   .service-row > p { grid-column: 3 / 5; margin-top: -12px; font-size: 14px; }
   .service-icon { width: 44px; height: 44px; }
   .service-name h3 { font-size: 22px; }
@@ -460,6 +467,8 @@ footer a { color: inherit; display: flex; gap: 8px; text-decoration: none; }
   .service-row { padding-block: 20px; }
   .service-row:hover { padding-inline: 8px; }
   .service-row > p { display: none; }
+  .service-whatsapp { font-size: 0; }
+  .service-whatsapp svg { width: 22px; height: 22px; }
   .service-name span { font-size: 8px; }
   .work-grid { grid-template-columns: 1fr; }
   .work-card:nth-child(even) { margin-top: 0; }
@@ -473,6 +482,7 @@ footer a { color: inherit; display: flex; gap: 8px; text-decoration: none; }
   .contact-top h2 { font-size: 52px; line-height: 1.34; }
   .lang-en .hero h1, .lang-en .section-heading h2, .lang-en .contact-top h2 { line-height: 1.18; }
   .contact-circle { position: static; width: 78px; height: 78px; margin-bottom: 45px; }
+  .whatsapp-floating { width: 52px; height: 52px; bottom: 18px; inset-inline-end: 18px; }
   footer { flex-wrap: wrap; justify-content: space-between; }
   footer p { order: 4; width: 100%; }
 }

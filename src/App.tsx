@@ -10,6 +10,7 @@ import {
   Instagram,
   Mail,
   Menu,
+  MessageCircle,
   Moon,
   Phone,
   Quote,
@@ -31,6 +32,17 @@ import hussainUrl from "./assets/hussain-keton.PNG";
 const logoAsset = { url: logoUrl };
 const wavesAsset = { url: wavesUrl };
 const hussainAsset = { url: hussainUrl };
+const whatsappNumber = "963997596503";
+const seoCopy = {
+  ar: {
+    title: "RELO & MOFIX | وكالة إبداعية للتصميم وصناعة المحتوى والتصوير وإدارة التواصل والويب",
+    description: "RELO & MOFIX وكالة إبداعية متخصصة في تصميم الهويات، صناعة المحتوى، التصوير، إدارة التواصل الاجتماعي وتصميم الويب. نحوّل قصتك إلى حضور بصري واضح ومؤثر.",
+  },
+  en: {
+    title: "RELO & MOFIX | Creative Design, Content, Photography, Social Media & Web",
+    description: "RELO & MOFIX is a creative agency specialising in brand identity, content creation, photography, social media management and web design.",
+  },
+};
 
 function getApiImageUrl(imageUrl: string | null | undefined, fallback: string) {
   if (!imageUrl) return fallback;
@@ -82,6 +94,21 @@ const copy = {
 
 function IconButton({ label, onClick, children }: { label: string; onClick?: () => void; children: React.ReactNode }) {
   return <button type="button" aria-label={label} title={label} onClick={onClick} className="icon-button">{children}</button>;
+}
+
+function getWhatsAppUrl(message: string) {
+  return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+}
+
+function updateSeoMetadata(language: "ar" | "en") {
+  const metadata = seoCopy[language];
+  document.title = metadata.title;
+  document.querySelector('meta[name="description"]')?.setAttribute("content", metadata.description);
+  document.querySelector('meta[property="og:title"]')?.setAttribute("content", metadata.title);
+  document.querySelector('meta[property="og:description"]')?.setAttribute("content", metadata.description);
+  document.querySelector('meta[name="twitter:title"]')?.setAttribute("content", metadata.title);
+  document.querySelector('meta[name="twitter:description"]')?.setAttribute("content", metadata.description);
+  document.querySelector('meta[property="og:locale"]')?.setAttribute("content", language === "ar" ? "ar_SY" : "en_US");
 }
 
 function CursorFollower() {
@@ -236,7 +263,7 @@ function Website() {
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
-    document.title = language === "ar" ? "RELO & MOFIX | نصنع هوية تُروى" : "RELO & MOFIX | Creative Design & Branding";
+    updateSeoMetadata(language);
   }, [dark, language]);
 
   useEffect(() => {
@@ -280,7 +307,14 @@ function Website() {
             {dark ? <Sun size={19} /> : <Moon size={19} />}
           </IconButton>
           <div className="mobile-menu"><IconButton label={t.menu} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <X /> : <Menu />}</IconButton></div>
-          <a className="header-cta" href="#contact" onClick={(e) => { e.preventDefault(); scrollToSection("contact"); }}>{t.start} <ArrowUpLeft size={17} /></a>
+          <a
+            className="header-cta"
+            href={getWhatsAppUrl(isArabic ? "مرحباً، أرغب ببدء مشروع جديد معكم." : "Hello, I would like to start a new project with you.")}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {t.start} <ArrowUpLeft size={17} />
+          </a>
         </div>
       </header>
 
@@ -305,12 +339,26 @@ function Website() {
         <div className="services-list">
           {services.map((service) => {
             const Icon = service.icon;
+            const serviceTitle = isArabic ? service.arTitle : service.enTitle;
+            const whatsappMessage = isArabic
+              ? `مرحباً، أرغب بالاستفسار عن خدمة ${serviceTitle} لدى RELO & MOFIX.`
+              : `Hello, I would like to enquire about ${serviceTitle} at RELO & MOFIX.`;
             return <article className="service-row" key={service.number}>
               <span className="service-number">{service.number}</span>
               <div className="service-icon"><Icon strokeWidth={1.5} /></div>
               <div className="service-name"><h3>{isArabic ? service.arTitle : service.enTitle}</h3><span>{isArabic ? service.enTitle : service.arTitle}</span></div>
               <p>{isArabic ? service.arText : service.enText}</p>
-              <ArrowUpLeft className="service-arrow" />
+              <a
+                className="service-whatsapp"
+                href={getWhatsAppUrl(whatsappMessage)}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={isArabic ? `راسلنا عن خدمة ${serviceTitle} عبر واتساب` : `Message us about ${serviceTitle} on WhatsApp`}
+                title={isArabic ? "راسلنا عبر واتساب" : "Message us on WhatsApp"}
+              >
+                <MessageCircle size={19} />
+                <span>WhatsApp</span>
+              </a>
             </article>;
           })}
         </div>
@@ -370,14 +418,41 @@ function Website() {
         <div className="contact-top">
           <p className="eyebrow">{t.contactEyebrow}</p>
           <h2>{t.contactTitle}</h2>
-          <a href="mailto:info@reelo-agency.com" className="contact-circle" aria-label={t.emailLabel}><ArrowUpLeft /></a>
+          <a
+            href={getWhatsAppUrl(isArabic ? "مرحباً، أرغب بالتحدث معكم عن مشروعي القادم." : "Hello, I would like to discuss my next project with you.")}
+            target="_blank"
+            rel="noreferrer"
+            className="contact-circle"
+            aria-label={isArabic ? "تحدث معنا عبر واتساب" : "Chat with us on WhatsApp"}
+          >
+            <ArrowUpLeft />
+          </a>
         </div>
         <div className="contact-details">
           <a href="tel:+963997596503"><Phone /><span>{t.contactLabels[0]}<strong dir="ltr">+963 997 596 503</strong></span></a>
-          <a href="mailto:info@reelo-agency.com"><Mail /><span>{t.contactLabels[1]}<strong>info@reelo-agency.com</strong></span></a>
-          <a href="https://reelo-agency.com"><Globe2 /><span>{t.contactLabels[2]}<strong>reelo-agency.com</strong></span></a>
+          <a
+            href={getWhatsAppUrl(isArabic ? "مرحباً، أرغب بالتواصل معكم حول مشروعي القادم." : "Hello, I would like to discuss my next project with you.")}
+            target="_blank"
+            rel="noreferrer"
+            className="contact-whatsapp"
+          >
+            <MessageCircle /><span>{isArabic ? "راسلنا عبر واتساب" : "Chat on WhatsApp"}<strong dir="ltr">+963 997 596 503</strong></span>
+          </a>
+          <a href="mailto:info@relomofix.com"><Mail /><span>{t.contactLabels[1]}<strong>info@relomofix.com</strong></span></a>
+          <a href="https://relomofix.com"><Globe2 /><span>{t.contactLabels[2]}<strong>relomofix.com</strong></span></a>
         </div>
       </section>
+
+      <a
+        className="whatsapp-floating"
+        href={getWhatsAppUrl(isArabic ? "مرحباً، أرغب بالتواصل معكم." : "Hello, I would like to get in touch with you.")}
+        target="_blank"
+        rel="noreferrer"
+        aria-label={isArabic ? "تواصل معنا عبر واتساب" : "Contact us on WhatsApp"}
+        title={isArabic ? "تواصل معنا عبر واتساب" : "Contact us on WhatsApp"}
+      >
+        <MessageCircle size={25} />
+      </a>
 
       <footer>
         <div className="footer-brand">RELO <b>&</b> MOFIX</div>
