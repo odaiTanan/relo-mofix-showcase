@@ -45,9 +45,14 @@ export interface AboutContent {
 
 class ApiClient {
   private token: string | null = null;
+  private onUnauthorizedCallback: (() => void) | null = null;
 
   constructor() {
     this.token = localStorage.getItem('auth_token');
+  }
+
+  setOnUnauthorized(callback: () => void) {
+    this.onUnauthorizedCallback = callback;
   }
 
   setToken(token: string) {
@@ -78,6 +83,14 @@ class ApiClient {
         ...options,
         headers,
       });
+
+      if (response.status === 401) {
+        this.clearToken();
+        if (this.onUnauthorizedCallback) {
+          this.onUnauthorizedCallback();
+        }
+        throw new Error('Unauthorized');
+      }
 
       const data = await response.json();
 
