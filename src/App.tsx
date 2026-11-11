@@ -3,16 +3,23 @@ import {
   ArrowUpLeft,
   Brush,
   Camera,
+  BarChart3,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  ClipboardList,
+  Facebook,
+  FileText,
   Globe2,
   Instagram,
   Mail,
+  Megaphone,
   Menu,
   MessageCircle,
   Moon,
   Phone,
+  ClipboardCheck,
+  Users,
   Quote,
   Share2,
   Sparkles,
@@ -58,6 +65,16 @@ const services = [
   { number: "03", arTitle: "التصوير والإنتاج", enTitle: "Photo & Video", arText: "صورة سينمائية وإنتاج متكامل يقدّم علامتك بأفضل حضور.", enText: "Cinematic visuals and end-to-end production that present your brand at its best.", icon: Camera },
   { number: "04", arTitle: "إدارة التواصل", enTitle: "Social Media Management", arText: "استراتيجية، نشر وتفاعل مستمر يصنع مجتمعاً حول علامتك.", enText: "Strategy, publishing, and ongoing engagement that build a community around your brand.", icon: Share2 },
   { number: "05", arTitle: "الويب والموبايل", enTitle: "Web Design & Mobile", arText: "تجارب رقمية سريعة، أنيقة ومصممة لتحقيق أهداف عملك.", enText: "Fast, elegant digital experiences designed to achieve your business goals.", icon: Globe2 },
+  { number: "06", arTitle: "الإعلانات الممولة", enTitle: "Paid Advertising", arText: "نخطط ونطلق حملات إعلانية تصل بعلامتك إلى الجمهور المناسب.", enText: "We plan and launch campaigns that put your brand in front of the right audience.", icon: Megaphone },
+  { number: "07", arTitle: "خطط المحتوى", enTitle: "Content Planning", arText: "خطط محتوى واضحة ومنظمة تحافظ على حضورك وتدعم أهدافك.", enText: "Clear, organized content plans that sustain your presence and support your goals.", icon: ClipboardList },
+];
+
+const processSteps = [
+  { number: "01", arTitle: "اجتماع", enTitle: "Meeting", arText: "نستمع لفكرتك ونفهم احتياجك وأهدافك.", enText: "We listen to your idea and understand your goals.", icon: Users },
+  { number: "02", arTitle: "خطة", enTitle: "Plan", arText: "نضع مساراً واضحاً للعمل والمحتوى والنتائج.", enText: "We set a clear path for the work, content, and outcomes.", icon: ClipboardCheck },
+  { number: "03", arTitle: "تنفيذ", enTitle: "Execution", arText: "نحوّل الخطة إلى عمل إبداعي متكامل.", enText: "We turn the plan into polished creative work.", icon: Sparkles },
+  { number: "04", arTitle: "نتائج", enTitle: "Results", arText: "نقيس الأثر ونراجع ما تحقق معاً.", enText: "We measure the impact and review what we achieved together.", icon: BarChart3 },
+  { number: "05", arTitle: "تقرير", enTitle: "Report", arText: "نشاركك تقريراً واضحاً وخطوات التطوير القادمة.", enText: "We share a clear report and the next steps for growth.", icon: FileText },
 ];
 
 interface WorkRecord {
@@ -75,17 +92,17 @@ interface WorkRecord {
 
 const copy = {
   ar: {
-    nav: ["خدماتنا", "من نحن", "أعمالنا", "الإدارة", "عملاؤنا", "تواصل معنا"], start: "ابدأ مشروعك", light: "تفعيل الوضع الفاتح", dark: "تفعيل الوضع الداكن", menu: "فتح القائمة",
+    nav: ["خدماتنا", "كيف منشتغل", "من نحن", "أعمالنا", "الإدارة", "عملاؤنا", "تواصل معنا"], start: "ابدأ مشروعك", light: "تفعيل الوضع الفاتح", dark: "تفعيل الوضع الداكن", menu: "فتح القائمة",
     heroTitle: <>نروي قصتك<br />بلغة <em>الإبداع.</em></>, heroCopy: "نصنع علامات لا تُنسى، ونحوّل الأفكار إلى تجارب بصرية تعيش في الذاكرة.", discover: "اكتشف أعمالنا",
-    servicesEyebrow: "ما الذي نصنعه", servicesTitle: "خدماتنا", servicesCopy: "من الفكرة الأولى حتى حضورك الكامل، نمنح كل تفصيل سبباً وهدفاً.",
+    servicesEyebrow: "ما الذي نصنعه", servicesTitle: "خدماتنا", servicesCopy: "من الفكرة الأولى حتى حضورك الكامل، نمنح كل تفصيل سبباً وهدفاً.", processEyebrow: "من الفكرة إلى الأثر", processTitle: "كيف منشتغل", processCopy: "نحوّل التعاون إلى خطوات واضحة، من أول لقاء حتى قراءة النتائج وتقديم التقرير.",
     workEyebrow: "مختارات من الاستوديو", workTitle: "أعمالنا", filters: ["الكل", "هويات بصرية", "مطبوعات", "محتوى رقمي", "تصوير"],
     managementEyebrow: "من يقود الحكاية", quote: "الإبداع ليس مجرد شكل جميل، بل فكرة صحيحة تُروى بالطريقة التي تستحقها.", name: "حسين كيطون", role: "المؤسس والمدير الإبداعي", bio: "يقود حسين فريق RELO & MOFIX برؤية تجمع بين الاستراتيجية والحس البصري، لبناء علامات واضحة، أصيلة وقادرة على النمو.",
     contactEyebrow: "فكرتك التالية تبدأ هنا", contactTitle: <>لنتحدث عن<br /><em>مشروعك القادم.</em></>, emailLabel: "أرسل لنا بريداً", contactLabels: ["اتصل بنا", "راسلنا", "زوروا موقعنا"], rights: "جميع الحقوق محفوظة", top: "العودة للأعلى",
   },
   en: {
-    nav: ["Services", "About", "Work", "Management", "Clients", "Contact"], start: "Start a project", light: "Enable light mode", dark: "Enable dark mode", menu: "Open menu",
+    nav: ["Services", "How we work", "About", "Work", "Management", "Clients", "Contact"], start: "Start a project", light: "Enable light mode", dark: "Enable dark mode", menu: "Open menu",
     heroTitle: <>We tell your story<br />through <em>creativity.</em></>, heroCopy: "We create unforgettable brands and turn ideas into visual experiences that live in memory.", discover: "Explore our work",
-    servicesEyebrow: "What we create", servicesTitle: "Services", servicesCopy: "From the first idea to your complete presence, we give every detail a reason and a purpose.",
+    servicesEyebrow: "What we create", servicesTitle: "Services", servicesCopy: "From the first idea to your complete presence, we give every detail a reason and a purpose.", processEyebrow: "From idea to impact", processTitle: "How we work", processCopy: "We turn collaboration into clear steps, from the first meeting to results and a final report.",
     workEyebrow: "Selected from the studio", workTitle: "Our work", filters: ["All", "Brand Identity", "Editorial", "Digital Content", "Photography"],
     managementEyebrow: "Leading the story", quote: "Creativity is more than a beautiful form. It is the right idea, told the way it deserves.", name: "Hussain Keton", role: "Founder & Creative Director", bio: "Hussain leads RELO & MOFIX with a vision that brings strategy and visual intuition together to build clear, authentic brands made to grow.",
     contactEyebrow: "Your next idea starts here", contactTitle: <>Let's talk about<br /><em>your next project.</em></>, emailLabel: "Send us an email", contactLabels: ["Call us", "Email us", "Visit our website"], rights: "All rights reserved", top: "Back to top",
@@ -299,7 +316,7 @@ function Website() {
           <span>RELO <b>&</b> MOFIX</span>
         </a>
         <nav className={menuOpen ? "nav-links nav-open" : "nav-links"} aria-label={isArabic ? "التنقل الرئيسي" : "Main navigation"}>
-          {t.nav.map((label, index) => <a href={["#services", "#about", "#work", "#management", "#clients", "#contact"][index]} onClick={(e) => { e.preventDefault(); scrollToSection(["services", "about", "work", "management", "clients", "contact"][index]); setMenuOpen(false); }} key={label}>{label}</a>)}
+          {t.nav.map((label, index) => <a href={["#services", "#process", "#about", "#work", "#management", "#clients", "#contact"][index]} onClick={(e) => { e.preventDefault(); scrollToSection(["services", "process", "about", "work", "management", "clients", "contact"][index]); setMenuOpen(false); }} key={label}>{label}</a>)}
         </nav>
         <div className="header-actions">
           <button type="button" className="language-toggle" onClick={() => { setLanguage(isArabic ? "en" : "ar"); setMenuOpen(false); }} aria-label={isArabic ? "Switch to English" : "التبديل إلى العربية"}>{isArabic ? "EN" : "AR"}</button>
@@ -357,10 +374,33 @@ function Website() {
                 title={isArabic ? "راسلنا عبر واتساب" : "Message us on WhatsApp"}
               >
                 <MessageCircle size={19} />
-                <span>WhatsApp</span>
+                <span>{isArabic ? "اطلب هالخدمة" : "Request this service"}</span>
               </a>
             </article>;
           })}
+        </div>
+      </section>
+
+      <section id="process" className="section process-section">
+        <div className="section-heading">
+          <div><p className="eyebrow">{t.processEyebrow}</p><h2>{t.processTitle}<span>.</span></h2></div>
+          <p>{t.processCopy}</p>
+        </div>
+        <div className="process-grid">
+          {processSteps.map((step) => {
+            const Icon = step.icon;
+            return <article className="process-card" key={step.number}>
+              <span className="process-number">{step.number}</span>
+              <div className="process-icon"><Icon strokeWidth={1.5} /></div>
+              <h3>{isArabic ? step.arTitle : step.enTitle}</h3>
+              <p>{isArabic ? step.arText : step.enText}</p>
+            </article>;
+          })}
+        </div>
+        <div className="process-socials">
+          <span>{isArabic ? "تابعوا أعمالنا وكواليسنا" : "Follow our work and behind the scenes"}</span>
+          <a href="https://www.instagram.com/relo.mofix/" target="_blank" rel="noreferrer"><Instagram size={18} /> @relo.mofix</a>
+          <a href="https://www.facebook.com/61587323528346/posts/%D9%85%D9%88-%D8%A8%D8%B3-reels-%D9%86%D8%AD%D9%86%D8%A7-%D9%85%D9%86%D8%AD%D9%88%D9%91%D9%84-%D8%A7%D9%84%D8%A3%D9%81%D9%83%D8%A7%D8%B1-%D9%84%D9%87%D9%88%D9%8A%D8%A9-%D9%88%D8%A7%D9%84%D9%85%D8%AD%D8%AA%D9%88%D9%89-%D9%84%D8%AA%D8%A3%D8%AB%D9%8A%D8%B1-%D9%88%D8%A7%D9%84%D8%A5%D8%A8%D8%AF%D8%A7%D8%B9-%D9%84%D9%86%D8%AA%D8%A7%D8%A6%D8%AC-relo-mofix/122139611781244117/" target="_blank" rel="noreferrer"><Facebook size={18} /> Facebook</a>
         </div>
       </section>
 
@@ -440,6 +480,20 @@ function Website() {
           </a>
           <a href="mailto:info@relomofix.com"><Mail /><span>{t.contactLabels[1]}<strong>info@relomofix.com</strong></span></a>
           <a href="https://relomofix.com"><Globe2 /><span>{t.contactLabels[2]}<strong>relomofix.com</strong></span></a>
+          <div className="contact-socials">
+            <a href="https://www.instagram.com/relo.mofix/" target="_blank" rel="noreferrer" aria-label="RELO & MOFIX Instagram">
+              <Instagram />
+              <span>Instagram<strong dir="ltr">@relo.mofix</strong></span>
+            </a>
+            <a href="https://www.facebook.com/61587323528346/posts/%D9%85%D9%88-%D8%A8%D8%B3-reels-%D9%86%D8%AD%D9%86%D8%A7-%D9%85%D9%86%D8%AD%D9%88%D9%91%D9%84-%D8%A7%D9%84%D8%A3%D9%81%D9%83%D8%A7%D8%B1-%D9%84%D9%87%D9%88%D9%8A%D8%A9-%D9%88%D8%A7%D9%84%D9%85%D8%AD%D8%AA%D9%88%D9%89-%D9%84%D8%AA%D8%A3%D8%AB%D9%8A%D8%B1-%D9%88%D8%A7%D9%84%D8%A5%D8%A8%D8%AF%D8%A7%D8%B9-%D9%84%D9%86%D8%AA%D8%A7%D8%A6%D8%AC-relo-mofix/122139611781244117/" target="_blank" rel="noreferrer" aria-label="RELO & MOFIX Facebook">
+              <Facebook />
+              <span>Facebook<strong>RELO & MOFIX</strong></span>
+            </a>
+            <a href="https://www.instagram.com/hussain_keton/" target="_blank" rel="noreferrer" aria-label="Hussain Keton Instagram">
+              <Instagram />
+              <span>{isArabic ? "إنستغرام المؤسس" : "Founder Instagram"}<strong dir="ltr">@hussain_keton</strong></span>
+            </a>
+          </div>
         </div>
       </section>
 
@@ -458,7 +512,11 @@ function Website() {
         <div className="footer-brand">RELO <b>&</b> MOFIX</div>
         <p>© 2026 {t.rights}</p>
         <a href="#home" aria-label={t.top} onClick={(e) => { e.preventDefault(); scrollToSection("home"); }}><ArrowUpLeft /> {t.top}</a>
-        <Instagram size={18} aria-label="Instagram" />
+        <div className="footer-socials" aria-label={isArabic ? "روابط التواصل الاجتماعي" : "Social media links"}>
+          <a href="https://www.instagram.com/relo.mofix/" target="_blank" rel="noreferrer" aria-label="RELO & MOFIX Instagram" title="RELO & MOFIX Instagram"><Instagram size={18} /></a>
+          <a href="https://www.facebook.com/61587323528346/posts/%D9%85%D9%88-%D8%A8%D8%B3-reels-%D9%86%D8%AD%D9%86%D8%A7-%D9%85%D9%86%D8%AD%D9%88%D9%91%D9%84-%D8%A7%D9%84%D8%A3%D9%81%D9%83%D8%A7%D8%B1-%D9%84%D9%87%D9%88%D9%8A%D8%A9-%D9%88%D8%A7%D9%84%D9%85%D8%AD%D8%AA%D9%88%D9%89-%D9%84%D8%AA%D8%A3%D8%AB%D9%8A%D8%B1-%D9%88%D8%A7%D9%84%D8%A5%D8%A8%D8%AF%D8%A7%D8%B9-%D9%84%D9%86%D8%AA%D8%A7%D8%A6%D8%AC-relo-mofix/122139611781244117/" target="_blank" rel="noreferrer" aria-label="RELO & MOFIX Facebook" title="RELO & MOFIX Facebook"><Facebook size={18} /></a>
+          <a href="https://www.instagram.com/hussain_keton/" target="_blank" rel="noreferrer" aria-label="Hussain Keton Instagram" title="Hussain Keton Instagram"><Instagram size={18} /></a>
+        </div>
       </footer>
     </main>
   );
