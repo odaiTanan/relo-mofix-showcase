@@ -1,4 +1,4 @@
-const API_BASE = (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '');
+const API_BASE = (import.meta.env.VITE_API_URL || "/api").replace(/\/$/, "");
 
 interface ApiResponse<T = any> {
   success: boolean;
@@ -43,12 +43,35 @@ export interface AboutContent {
   image_url?: string | null;
 }
 
+export interface WorkRecord {
+  id: string;
+  slug?: string | null;
+  ar_title: string;
+  en_title: string;
+  ar_type: string;
+  en_type: string;
+  tag: string;
+  category_id: string | null;
+  category_slug?: string;
+  category_ar_name?: string;
+  category_en_name?: string;
+  image_url: string | null;
+  result_value?: string | null;
+  result_label?: string | null;
+  problem?: string | null;
+  solution?: string | null;
+  testimonial?: string | null;
+  external_url?: string | null;
+  embed_code?: string | null;
+  sort_order?: number;
+}
+
 class ApiClient {
   private token: string | null = null;
   private onUnauthorizedCallback: (() => void) | null = null;
 
   constructor() {
-    this.token = localStorage.getItem('auth_token');
+    this.token = localStorage.getItem("auth_token");
   }
 
   setOnUnauthorized(callback: () => void) {
@@ -57,25 +80,22 @@ class ApiClient {
 
   setToken(token: string) {
     this.token = token;
-    localStorage.setItem('auth_token', token);
+    localStorage.setItem("auth_token", token);
   }
 
   clearToken() {
     this.token = null;
-    localStorage.removeItem('auth_token');
+    localStorage.removeItem("auth_token");
   }
 
-  private async request<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<ApiResponse<T>> {
+  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      ...(options.headers as Record<string, string> || {}),
+      "Content-Type": "application/json",
+      ...((options.headers as Record<string, string>) || {}),
     };
 
     if (this.token) {
-      headers['Authorization'] = `Bearer ${this.token}`;
+      headers["Authorization"] = `Bearer ${this.token}`;
     }
 
     try {
@@ -89,27 +109,27 @@ class ApiClient {
         if (this.onUnauthorizedCallback) {
           this.onUnauthorizedCallback();
         }
-        throw new Error('Unauthorized');
+        throw new Error("Unauthorized");
       }
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Request failed');
+        throw new Error(data.error || "Request failed");
       }
 
       return data;
     } catch (error) {
-      console.error('API Error:', error);
+      console.error("API Error:", error);
       throw error;
     }
   }
 
   async login(username: string, password: string): Promise<ApiResponse> {
-    const response = await this.request('/auth.php', {
-      method: 'POST',
+    const response = await this.request("/auth.php", {
+      method: "POST",
       body: JSON.stringify({
-        action: 'login',
+        action: "login",
         username,
         password,
       }),
@@ -126,108 +146,117 @@ class ApiClient {
     this.clearToken();
   }
 
-  async getWorks(): Promise<ApiResponse> {
-    return this.request('/works.php');
+  async getWorks(): Promise<ApiResponse<WorkRecord[]>> {
+    return this.request("/works.php");
   }
 
   async getCategories(): Promise<ApiResponse<Category[]>> {
-    return this.request('/categories.php');
+    return this.request("/categories.php");
   }
 
   async getClients(): Promise<ApiResponse<ClientLogo[]>> {
-    return this.request('/clients.php');
+    return this.request("/clients.php");
   }
 
   async createClient(imageFile: File): Promise<ApiResponse> {
     const formData = new FormData();
-    formData.append('logo', imageFile);
+    formData.append("logo", imageFile);
     const response = await fetch(`${API_BASE}/clients.php`, {
-      method: 'POST',
+      method: "POST",
       headers: this.token ? { Authorization: `Bearer ${this.token}` } : {},
       body: formData,
     });
     return response.json();
   }
 
-  async moveClient(id: string, direction: 'up' | 'down'): Promise<ApiResponse> {
-    return this.request(`/clients.php?id=${id}`, { method: 'PUT', body: JSON.stringify({ direction }) });
+  async moveClient(id: string, direction: "up" | "down"): Promise<ApiResponse> {
+    return this.request(`/clients.php?id=${id}`, {
+      method: "PUT",
+      body: JSON.stringify({ direction }),
+    });
   }
 
   async deleteClient(id: string): Promise<ApiResponse> {
-    return this.request(`/clients.php?id=${id}`, { method: 'DELETE' });
+    return this.request(`/clients.php?id=${id}`, { method: "DELETE" });
   }
 
   async getTestimonials(): Promise<ApiResponse<Testimonial[]>> {
-    return this.request('/testimonials.php');
+    return this.request("/testimonials.php");
   }
 
-  async createTestimonial(data: Omit<Testimonial, 'id' | 'sort_order'>): Promise<ApiResponse> {
-    return this.request('/testimonials.php', { method: 'POST', body: JSON.stringify(data) });
+  async createTestimonial(data: Omit<Testimonial, "id" | "sort_order">): Promise<ApiResponse> {
+    return this.request("/testimonials.php", { method: "POST", body: JSON.stringify(data) });
   }
 
-  async moveTestimonial(id: string, direction: 'up' | 'down'): Promise<ApiResponse> {
-    return this.request(`/testimonials.php?id=${id}`, { method: 'PUT', body: JSON.stringify({ direction }) });
+  async moveTestimonial(id: string, direction: "up" | "down"): Promise<ApiResponse> {
+    return this.request(`/testimonials.php?id=${id}`, {
+      method: "PUT",
+      body: JSON.stringify({ direction }),
+    });
   }
 
   async deleteTestimonial(id: string): Promise<ApiResponse> {
-    return this.request(`/testimonials.php?id=${id}`, { method: 'DELETE' });
+    return this.request(`/testimonials.php?id=${id}`, { method: "DELETE" });
   }
 
   async getAbout(): Promise<ApiResponse<AboutContent | null>> {
-    return this.request('/about.php');
+    return this.request("/about.php");
   }
 
   async saveAbout(data: AboutContent): Promise<ApiResponse> {
-    return this.request('/about.php', { method: 'PUT', body: JSON.stringify(data) });
+    return this.request("/about.php", { method: "PUT", body: JSON.stringify(data) });
   }
 
   async uploadAboutImage(imageFile: File): Promise<ApiResponse<{ image_url: string }>> {
     const formData = new FormData();
-    formData.append('image', imageFile);
+    formData.append("image", imageFile);
     const response = await fetch(`${API_BASE}/about.php`, {
-      method: 'POST',
+      method: "POST",
       headers: this.token ? { Authorization: `Bearer ${this.token}` } : {},
       body: formData,
     });
     return response.json();
   }
 
-  async createCategory(data: Pick<Category, 'slug' | 'ar_name' | 'en_name'>): Promise<ApiResponse> {
-    return this.request('/categories.php', {
-      method: 'POST',
+  async createCategory(data: Pick<Category, "slug" | "ar_name" | "en_name">): Promise<ApiResponse> {
+    return this.request("/categories.php", {
+      method: "POST",
       body: JSON.stringify(data),
     });
   }
 
-  async updateCategory(id: string, data: Pick<Category, 'slug' | 'ar_name' | 'en_name'>): Promise<ApiResponse> {
+  async updateCategory(
+    id: string,
+    data: Pick<Category, "slug" | "ar_name" | "en_name">,
+  ): Promise<ApiResponse> {
     return this.request(`/categories.php?id=${id}`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(data),
     });
   }
 
   async deleteCategory(id: string): Promise<ApiResponse> {
     return this.request(`/categories.php?id=${id}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
   }
 
-  async getWork(id: string): Promise<ApiResponse> {
+  async getWork(id: string): Promise<ApiResponse<WorkRecord>> {
     return this.request(`/works.php?id=${id}`);
   }
 
   async createWork(data: any, imageFile?: File): Promise<ApiResponse> {
     const formData = new FormData();
-    Object.keys(data).forEach(key => {
+    Object.keys(data).forEach((key) => {
       formData.append(key, data[key]);
     });
 
     if (imageFile) {
-      formData.append('image', imageFile);
+      formData.append("image", imageFile);
     }
 
     const response = await fetch(`${API_BASE}/works.php`, {
-      method: 'POST',
+      method: "POST",
       headers: this.token ? { Authorization: `Bearer ${this.token}` } : {},
       body: formData,
     });
@@ -235,41 +264,48 @@ class ApiClient {
     return response.json();
   }
 
-  async createWorksBulk(categoryId: string, imageFiles: File[], onProgress?: (completed: number, total: number) => void): Promise<ApiResponse> {
+  async createWorksBulk(
+    categoryId: string,
+    imageFiles: File[],
+    onProgress?: (completed: number, total: number) => void,
+  ): Promise<ApiResponse> {
     let created = 0;
 
     for (const file of imageFiles) {
-      const title = file.name.replace(/\.[^/.]+$/, '') || 'Untitled work';
-      const response = await this.createWork({
-        ar_title: title,
-        en_title: title,
-        ar_type: 'Portfolio',
-        en_type: 'Portfolio',
-        tag: 'BULK',
-        category_id: categoryId,
-        class_name: 'work-orange',
-      }, file);
+      const title = file.name.replace(/\.[^/.]+$/, "") || "Untitled work";
+      const response = await this.createWork(
+        {
+          ar_title: title,
+          en_title: title,
+          ar_type: "Portfolio",
+          en_type: "Portfolio",
+          tag: "BULK",
+          category_id: categoryId,
+          class_name: "work-orange",
+        },
+        file,
+      );
 
       if (!response.success) return response;
       created += 1;
       onProgress?.(created, imageFiles.length);
     }
 
-    return { success: true, message: 'Works created successfully', count: created };
+    return { success: true, message: "Works created successfully", count: created };
   }
 
   async updateWork(id: string, data: any, imageFile?: File): Promise<ApiResponse> {
     const formData = new FormData();
-    Object.keys(data).forEach(key => {
+    Object.keys(data).forEach((key) => {
       formData.append(key, data[key]);
     });
 
     if (imageFile) {
-      formData.append('image', imageFile);
+      formData.append("image", imageFile);
     }
 
     const response = await fetch(`${API_BASE}/works.php?id=${id}`, {
-      method: 'PUT',
+      method: "PUT",
       headers: this.token ? { Authorization: `Bearer ${this.token}` } : {},
       body: formData,
     });
@@ -279,7 +315,7 @@ class ApiClient {
 
   async deleteWork(id: string): Promise<ApiResponse> {
     return this.request(`/works.php?id=${id}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
   }
 }

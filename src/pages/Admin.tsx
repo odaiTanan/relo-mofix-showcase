@@ -21,20 +21,59 @@ import { AboutContent, api, Category, ClientLogo, Testimonial } from "../lib/api
 
 interface WorkItem {
   id: string;
+  slug?: string | null;
   ar_title: string;
   en_title: string;
+  ar_type?: string;
+  en_type?: string;
   tag: string;
   category_id: string | null;
   category_ar_name?: string;
   image_url: string | null;
+  result_value?: string | null;
+  result_label?: string | null;
+  problem?: string | null;
+  solution?: string | null;
+  testimonial?: string | null;
+  external_url?: string | null;
+  embed_code?: string | null;
+  sort_order?: number;
 }
 
 type View = "works" | "categories" | "clients" | "testimonials" | "about";
 
 const emptyCategory = { slug: "", ar_name: "", en_name: "" };
-const emptyWork = { ar_title: "", en_title: "", tag: "", category_id: "" };
-const emptyTestimonial = { ar_quote: "", en_quote: "", ar_name: "", en_name: "", ar_role: "", en_role: "" };
-const emptyAbout: AboutContent = { ar_title: "من نحن", en_title: "About us", ar_text: "", en_text: "" };
+const emptyWork = {
+  ar_title: "",
+  en_title: "",
+  ar_type: "",
+  en_type: "",
+  tag: "",
+  category_id: "",
+  slug: "",
+  result_value: "",
+  result_label: "",
+  problem: "",
+  solution: "",
+  testimonial: "",
+  external_url: "",
+  embed_code: "",
+  sort_order: "0",
+};
+const emptyTestimonial = {
+  ar_quote: "",
+  en_quote: "",
+  ar_name: "",
+  en_name: "",
+  ar_role: "",
+  en_role: "",
+};
+const emptyAbout: AboutContent = {
+  ar_title: "من نحن",
+  en_title: "About us",
+  ar_text: "",
+  en_text: "",
+};
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 
 export default function Admin() {
@@ -68,7 +107,13 @@ export default function Admin() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [worksResponse, categoriesResponse, clientsResponse, testimonialsResponse, aboutResponse] = await Promise.all([
+      const [
+        worksResponse,
+        categoriesResponse,
+        clientsResponse,
+        testimonialsResponse,
+        aboutResponse,
+      ] = await Promise.all([
         api.getWorks(),
         api.getCategories(),
         api.getClients(),
@@ -79,7 +124,10 @@ export default function Admin() {
       if (categoriesResponse.success) setCategories(categoriesResponse.data || []);
       if (clientsResponse.success) setClients(clientsResponse.data || []);
       if (testimonialsResponse.success) setTestimonials(testimonialsResponse.data || []);
-      if (aboutResponse.success && aboutResponse.data) { setAbout(aboutResponse.data); setAboutForm(aboutResponse.data); }
+      if (aboutResponse.success && aboutResponse.data) {
+        setAbout(aboutResponse.data);
+        setAboutForm(aboutResponse.data);
+      }
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "تعذر تحميل البيانات");
     } finally {
@@ -94,14 +142,20 @@ export default function Admin() {
   const handleClientUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    if (file.size > MAX_IMAGE_SIZE) { setMessage("حجم الشعار يجب ألا يتجاوز 5MB"); event.target.value = ""; return; }
+    if (file.size > MAX_IMAGE_SIZE) {
+      setMessage("حجم الشعار يجب ألا يتجاوز 5MB");
+      event.target.value = "";
+      return;
+    }
     try {
       const response = await api.createClient(file);
       if (!response.success) throw new Error(response.error || "تعذر حفظ الشعار");
       await loadData();
       event.target.value = "";
       setMessage("تمت إضافة شعار العميل");
-    } catch (error) { setMessage(error instanceof Error ? error.message : "تعذر حفظ الشعار"); }
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "تعذر حفظ الشعار");
+    }
   };
 
   const moveClient = async (client: ClientLogo, direction: "up" | "down") => {
@@ -126,7 +180,9 @@ export default function Admin() {
       setTestimonialForm(emptyTestimonial);
       setTestimonialFormOpen(false);
       setMessage("تمت إضافة شهادة العميل");
-    } catch (error) { setMessage(error instanceof Error ? error.message : "تعذر حفظ الشهادة"); }
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "تعذر حفظ الشهادة");
+    }
   };
 
   const moveTestimonial = async (testimonial: Testimonial, direction: "up" | "down") => {
@@ -149,13 +205,19 @@ export default function Admin() {
       if (!response.success) throw new Error(response.error || "تعذر حفظ قسم من نحن");
       setAbout(aboutForm);
       setMessage("تم حفظ قسم من نحن");
-    } catch (error) { setMessage(error instanceof Error ? error.message : "تعذر حفظ قسم من نحن"); }
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "تعذر حفظ قسم من نحن");
+    }
   };
 
   const handleAboutImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    if (file.size > MAX_IMAGE_SIZE) { setMessage("حجم الصورة يجب ألا يتجاوز 5MB"); event.target.value = ""; return; }
+    if (file.size > MAX_IMAGE_SIZE) {
+      setMessage("حجم الصورة يجب ألا يتجاوز 5MB");
+      event.target.value = "";
+      return;
+    }
     try {
       const response = await api.uploadAboutImage(file);
       if (!response.success) throw new Error(response.error || "تعذر رفع صورة قسم من نحن");
@@ -164,7 +226,9 @@ export default function Admin() {
       setAboutForm(nextAbout);
       event.target.value = "";
       setMessage("تم تحديث صورة قسم من نحن");
-    } catch (error) { setMessage(error instanceof Error ? error.message : "تعذر رفع الصورة"); }
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "تعذر رفع الصورة");
+    }
   };
 
   const visibleWorks = useMemo(
@@ -289,7 +353,10 @@ export default function Admin() {
           <button className={view === "clients" ? "active" : ""} onClick={() => setView("clients")}>
             <ImageIcon size={18} /> عملاؤنا
           </button>
-          <button className={view === "testimonials" ? "active" : ""} onClick={() => setView("testimonials")}>
+          <button
+            className={view === "testimonials" ? "active" : ""}
+            onClick={() => setView("testimonials")}
+          >
             <Quote size={18} /> آراء العملاء
           </button>
           <button className={view === "about" ? "active" : ""} onClick={() => setView("about")}>
@@ -311,11 +378,30 @@ export default function Admin() {
         <header className="admin-topbar">
           <div>
             <span className="admin-kicker">RELO / ADMIN</span>
-            <h1>{view === "works" ? "الأعمال" : view === "categories" ? "التصنيفات" : view === "clients" ? "عملاؤنا" : view === "testimonials" ? "آراء العملاء" : "من نحن"}</h1>
+            <h1>
+              {view === "works"
+                ? "الأعمال"
+                : view === "categories"
+                  ? "التصنيفات"
+                  : view === "clients"
+                    ? "عملاؤنا"
+                    : view === "testimonials"
+                      ? "آراء العملاء"
+                      : "من نحن"}
+            </h1>
           </div>
           {view === "works" ? (
             <div className="admin-topbar-actions">
-              <button className="admin-secondary-button" onClick={() => { setBulkCategory(categories[0]?.id || ""); setBulkFiles([]); setBulkFormOpen(true); }}><Images size={18} /> رفع جماعي</button>
+              <button
+                className="admin-secondary-button"
+                onClick={() => {
+                  setBulkCategory(categories[0]?.id || "");
+                  setBulkFiles([]);
+                  setBulkFormOpen(true);
+                }}
+              >
+                <Images size={18} /> رفع جماعي
+              </button>
               <button
                 className="admin-primary-button"
                 onClick={() => {
@@ -390,6 +476,17 @@ export default function Admin() {
                     />
                   </label>
                   <label>
+                    الرابط المختصر
+                    <input
+                      value={workForm.slug}
+                      onChange={(e) =>
+                        setWorkForm({ ...workForm, slug: e.target.value.toLowerCase() })
+                      }
+                      placeholder="najez"
+                      pattern="[a-z0-9-]+"
+                    />
+                  </label>
+                  <label>
                     التصنيف
                     <select
                       required
@@ -413,10 +510,72 @@ export default function Admin() {
                       placeholder="BRANDING"
                     />
                   </label>
-                  <label className="admin-upload-label">
-                    صورة المشروع <span>صورة كبيرة مناسبة للكاروسيل، حتى 5MB</span>
+                  <label>
+                    رقم النتيجة
                     <input
-                      required={!imagePreview}
+                      value={workForm.result_value}
+                      onChange={(e) => setWorkForm({ ...workForm, result_value: e.target.value })}
+                      placeholder="33,891"
+                    />
+                  </label>
+                  <label>
+                    شرح النتيجة
+                    <input
+                      value={workForm.result_label}
+                      onChange={(e) => setWorkForm({ ...workForm, result_label: e.target.value })}
+                      placeholder="مشاهدة"
+                    />
+                  </label>
+                  <label>
+                    رابط الموقع أو التطبيق
+                    <input
+                      type="url"
+                      value={workForm.external_url}
+                      onChange={(e) => setWorkForm({ ...workForm, external_url: e.target.value })}
+                      placeholder="https://example.com"
+                    />
+                  </label>
+                  <label>
+                    الترتيب
+                    <input
+                      type="number"
+                      value={workForm.sort_order}
+                      onChange={(e) => setWorkForm({ ...workForm, sort_order: e.target.value })}
+                    />
+                  </label>
+                  <label>
+                    المشكلة
+                    <textarea
+                      value={workForm.problem}
+                      onChange={(e) => setWorkForm({ ...workForm, problem: e.target.value })}
+                    />
+                  </label>
+                  <label>
+                    ما عملناه
+                    <textarea
+                      value={workForm.solution}
+                      onChange={(e) => setWorkForm({ ...workForm, solution: e.target.value })}
+                    />
+                  </label>
+                  <label>
+                    رأي العميل
+                    <textarea
+                      value={workForm.testimonial}
+                      onChange={(e) => setWorkForm({ ...workForm, testimonial: e.target.value })}
+                    />
+                  </label>
+                  <label className="admin-embed-label">
+                    كود تضمين Instagram للريلز
+                    <textarea
+                      value={workForm.embed_code}
+                      onChange={(e) => setWorkForm({ ...workForm, embed_code: e.target.value })}
+                      placeholder="الصق كود التضمين هنا. يمكن لصق أكثر من كود."
+                    />
+                  </label>
+                  <label className="admin-upload-label">
+                    صورة المشروع <span>اختيارية للريلز، ومطلوبة للمواقع والتطبيقات، حتى 5MB</span>
+                    <input
+                      required={!imagePreview && !workForm.embed_code}
                       type="file"
                       accept="image/jpeg,image/png,image/webp"
                       onChange={handleImageUpload}
@@ -438,15 +597,87 @@ export default function Admin() {
             {bulkFormOpen && (
               <section className="admin-form-panel admin-bulk-panel">
                 <div className="admin-panel-heading">
-                  <div><span className="admin-kicker">BATCH UPLOAD</span><h2>رفع صور متعددة</h2></div>
-                  <button className="admin-icon-button" onClick={() => setBulkFormOpen(false)}><X size={18} /></button>
+                  <div>
+                    <span className="admin-kicker">BATCH UPLOAD</span>
+                    <h2>رفع صور متعددة</h2>
+                  </div>
+                  <button className="admin-icon-button" onClick={() => setBulkFormOpen(false)}>
+                    <X size={18} />
+                  </button>
                 </div>
                 <form onSubmit={handleBulkUpload} className="admin-bulk-form">
-                  <label>التصنيف<select required value={bulkCategory} onChange={(event) => setBulkCategory(event.target.value)}><option value="">اختر التصنيف</option>{categories.map((category) => <option key={category.id} value={category.id}>{category.ar_name} / {category.en_name}</option>)}</select></label>
-                  <label className="admin-bulk-file-label">الصور <span>يمكنك اختيار عدة صور، وسيتم إنشاء عمل لكل صورة، بحد أقصى 5MB للصورة</span><input required={!bulkFiles.length} type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={(event) => { const files = Array.from(event.target.files || []); const invalid = files.find((file) => file.size > MAX_IMAGE_SIZE); if (invalid) { setMessage(`الصورة ${invalid.name} تتجاوز 5MB`); setBulkFiles([]); event.target.value = ""; return; } setBulkFiles(files); }} /></label>
-                  <div className="admin-bulk-summary">{bulkFiles.length ? `تم اختيار ${bulkFiles.length} صور` : "لم يتم اختيار صور بعد"}</div>
-                  {bulkUploading && <div className="admin-progress" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={bulkProgress}><div className="admin-progress-track"><span style={{ width: `${bulkProgress}%` }} /></div><div className="admin-progress-label"><span>تم رفع {Math.round((bulkProgress / 100) * bulkFiles.length)} من {bulkFiles.length} صور</span><strong>{bulkProgress}%</strong></div></div>}
-                  <button className="admin-primary-button" type="submit" disabled={bulkUploading}>{bulkUploading ? <><span className="admin-spinner" /> جاري رفع الصور...</> : <><Images size={18} /> رفع وإضافة الأعمال</>}</button>
+                  <label>
+                    التصنيف
+                    <select
+                      required
+                      value={bulkCategory}
+                      onChange={(event) => setBulkCategory(event.target.value)}
+                    >
+                      <option value="">اختر التصنيف</option>
+                      {categories.map((category) => (
+                        <option key={category.id} value={category.id}>
+                          {category.ar_name} / {category.en_name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="admin-bulk-file-label">
+                    الصور{" "}
+                    <span>يمكنك اختيار عدة صور، وسيتم إنشاء عمل لكل صورة، بحد أقصى 5MB للصورة</span>
+                    <input
+                      required={!bulkFiles.length}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      multiple
+                      onChange={(event) => {
+                        const files = Array.from(event.target.files || []);
+                        const invalid = files.find((file) => file.size > MAX_IMAGE_SIZE);
+                        if (invalid) {
+                          setMessage(`الصورة ${invalid.name} تتجاوز 5MB`);
+                          setBulkFiles([]);
+                          event.target.value = "";
+                          return;
+                        }
+                        setBulkFiles(files);
+                      }}
+                    />
+                  </label>
+                  <div className="admin-bulk-summary">
+                    {bulkFiles.length
+                      ? `تم اختيار ${bulkFiles.length} صور`
+                      : "لم يتم اختيار صور بعد"}
+                  </div>
+                  {bulkUploading && (
+                    <div
+                      className="admin-progress"
+                      role="progressbar"
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={bulkProgress}
+                    >
+                      <div className="admin-progress-track">
+                        <span style={{ width: `${bulkProgress}%` }} />
+                      </div>
+                      <div className="admin-progress-label">
+                        <span>
+                          تم رفع {Math.round((bulkProgress / 100) * bulkFiles.length)} من{" "}
+                          {bulkFiles.length} صور
+                        </span>
+                        <strong>{bulkProgress}%</strong>
+                      </div>
+                    </div>
+                  )}
+                  <button className="admin-primary-button" type="submit" disabled={bulkUploading}>
+                    {bulkUploading ? (
+                      <>
+                        <span className="admin-spinner" /> جاري رفع الصور...
+                      </>
+                    ) : (
+                      <>
+                        <Images size={18} /> رفع وإضافة الأعمال
+                      </>
+                    )}
+                  </button>
                 </form>
               </section>
             )}
@@ -478,6 +709,8 @@ export default function Admin() {
                         <h3>{work.ar_title}</h3>
                         <p>
                           {work.en_title} · {work.tag}
+                          {work.external_url ? " · رابط خارجي" : ""}
+                          {work.embed_code ? " · ريلز" : ""}
                         </p>
                       </div>
                       <button
@@ -579,20 +812,52 @@ export default function Admin() {
         {view === "clients" && (
           <section className="admin-table-panel">
             <div className="admin-panel-heading">
-              <div><span className="admin-kicker">CLIENT LOGOS</span><h2>شعارات عملائنا</h2></div>
-              <label className="admin-primary-button admin-file-button"><Plus size={18} /> إضافة شعار<input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleClientUpload} /></label>
+              <div>
+                <span className="admin-kicker">CLIENT LOGOS</span>
+                <h2>شعارات عملائنا</h2>
+              </div>
+              <label className="admin-primary-button admin-file-button">
+                <Plus size={18} /> إضافة شعار
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  onChange={handleClientUpload}
+                />
+              </label>
             </div>
-            {clients.length === 0 ? <div className="admin-empty">لم تتم إضافة شعارات بعد.</div> : (
+            {clients.length === 0 ? (
+              <div className="admin-empty">لم تتم إضافة شعارات بعد.</div>
+            ) : (
               <div className="admin-client-list">
                 {clients.map((client, index) => (
                   <article className="admin-client-item" key={client.id}>
                     <img src={client.logo_url} alt="" />
                     <span>الشعار {index + 1}</span>
                     <div className="admin-order-actions">
-                      <button className="admin-icon-button" disabled={index === 0} onClick={() => moveClient(client, "up")} aria-label="تحريك لأعلى"><ChevronUp size={17} /></button>
-                      <button className="admin-icon-button" disabled={index === clients.length - 1} onClick={() => moveClient(client, "down")} aria-label="تحريك لأسفل"><ChevronDown size={17} /></button>
+                      <button
+                        className="admin-icon-button"
+                        disabled={index === 0}
+                        onClick={() => moveClient(client, "up")}
+                        aria-label="تحريك لأعلى"
+                      >
+                        <ChevronUp size={17} />
+                      </button>
+                      <button
+                        className="admin-icon-button"
+                        disabled={index === clients.length - 1}
+                        onClick={() => moveClient(client, "down")}
+                        aria-label="تحريك لأسفل"
+                      >
+                        <ChevronDown size={17} />
+                      </button>
                     </div>
-                    <button className="admin-delete-button" onClick={() => deleteClient(client.id)} aria-label="حذف الشعار"><Trash2 size={18} /></button>
+                    <button
+                      className="admin-delete-button"
+                      onClick={() => deleteClient(client.id)}
+                      aria-label="حذف الشعار"
+                    >
+                      <Trash2 size={18} />
+                    </button>
                   </article>
                 ))}
               </div>
@@ -603,32 +868,131 @@ export default function Admin() {
         {view === "testimonials" && (
           <section className="admin-table-panel">
             <div className="admin-panel-heading">
-              <div><span className="admin-kicker">TESTIMONIALS</span><h2>آراء العملاء</h2></div>
-              <button className="admin-primary-button" onClick={() => { setTestimonialForm(emptyTestimonial); setTestimonialFormOpen(true); }}><Plus size={18} /> شهادة جديدة</button>
+              <div>
+                <span className="admin-kicker">TESTIMONIALS</span>
+                <h2>آراء العملاء</h2>
+              </div>
+              <button
+                className="admin-primary-button"
+                onClick={() => {
+                  setTestimonialForm(emptyTestimonial);
+                  setTestimonialFormOpen(true);
+                }}
+              >
+                <Plus size={18} /> شهادة جديدة
+              </button>
             </div>
             {testimonialFormOpen && (
               <form onSubmit={handleSaveTestimonial} className="admin-testimonial-form">
-                <label>الشهادة بالعربية<textarea required value={testimonialForm.ar_quote} onChange={(event) => setTestimonialForm({ ...testimonialForm, ar_quote: event.target.value })} /></label>
-                <label>الشهادة بالإنجليزية<textarea required value={testimonialForm.en_quote} onChange={(event) => setTestimonialForm({ ...testimonialForm, en_quote: event.target.value })} /></label>
-                <label>اسم العميل بالعربية<input required value={testimonialForm.ar_name} onChange={(event) => setTestimonialForm({ ...testimonialForm, ar_name: event.target.value })} /></label>
-                <label>اسم العميل بالإنجليزية<input required value={testimonialForm.en_name} onChange={(event) => setTestimonialForm({ ...testimonialForm, en_name: event.target.value })} /></label>
-                <label>الصفة بالعربية<input required value={testimonialForm.ar_role} onChange={(event) => setTestimonialForm({ ...testimonialForm, ar_role: event.target.value })} /></label>
-                <label>الصفة بالإنجليزية<input required value={testimonialForm.en_role} onChange={(event) => setTestimonialForm({ ...testimonialForm, en_role: event.target.value })} /></label>
-                <button className="admin-primary-button" type="submit"><Save size={18} /> حفظ الشهادة</button>
-                <button className="admin-secondary-button" type="button" onClick={() => setTestimonialFormOpen(false)}><X size={18} /> إلغاء</button>
+                <label>
+                  الشهادة بالعربية
+                  <textarea
+                    required
+                    value={testimonialForm.ar_quote}
+                    onChange={(event) =>
+                      setTestimonialForm({ ...testimonialForm, ar_quote: event.target.value })
+                    }
+                  />
+                </label>
+                <label>
+                  الشهادة بالإنجليزية
+                  <textarea
+                    required
+                    value={testimonialForm.en_quote}
+                    onChange={(event) =>
+                      setTestimonialForm({ ...testimonialForm, en_quote: event.target.value })
+                    }
+                  />
+                </label>
+                <label>
+                  اسم العميل بالعربية
+                  <input
+                    required
+                    value={testimonialForm.ar_name}
+                    onChange={(event) =>
+                      setTestimonialForm({ ...testimonialForm, ar_name: event.target.value })
+                    }
+                  />
+                </label>
+                <label>
+                  اسم العميل بالإنجليزية
+                  <input
+                    required
+                    value={testimonialForm.en_name}
+                    onChange={(event) =>
+                      setTestimonialForm({ ...testimonialForm, en_name: event.target.value })
+                    }
+                  />
+                </label>
+                <label>
+                  الصفة بالعربية
+                  <input
+                    required
+                    value={testimonialForm.ar_role}
+                    onChange={(event) =>
+                      setTestimonialForm({ ...testimonialForm, ar_role: event.target.value })
+                    }
+                  />
+                </label>
+                <label>
+                  الصفة بالإنجليزية
+                  <input
+                    required
+                    value={testimonialForm.en_role}
+                    onChange={(event) =>
+                      setTestimonialForm({ ...testimonialForm, en_role: event.target.value })
+                    }
+                  />
+                </label>
+                <button className="admin-primary-button" type="submit">
+                  <Save size={18} /> حفظ الشهادة
+                </button>
+                <button
+                  className="admin-secondary-button"
+                  type="button"
+                  onClick={() => setTestimonialFormOpen(false)}
+                >
+                  <X size={18} /> إلغاء
+                </button>
               </form>
             )}
-            {testimonials.length === 0 ? <div className="admin-empty">لم تتم إضافة شهادات بعد.</div> : (
+            {testimonials.length === 0 ? (
+              <div className="admin-empty">لم تتم إضافة شهادات بعد.</div>
+            ) : (
               <div className="admin-testimonial-list">
                 {testimonials.map((testimonial, index) => (
                   <article className="admin-testimonial-item" key={testimonial.id}>
                     <Quote size={24} />
-                    <div><p>{testimonial.ar_quote}</p><strong>{testimonial.ar_name}</strong><span>{testimonial.ar_role}</span></div>
-                    <div className="admin-order-actions">
-                      <button className="admin-icon-button" disabled={index === 0} onClick={() => moveTestimonial(testimonial, "up")} aria-label="تحريك لأعلى"><ChevronUp size={17} /></button>
-                      <button className="admin-icon-button" disabled={index === testimonials.length - 1} onClick={() => moveTestimonial(testimonial, "down")} aria-label="تحريك لأسفل"><ChevronDown size={17} /></button>
+                    <div>
+                      <p>{testimonial.ar_quote}</p>
+                      <strong>{testimonial.ar_name}</strong>
+                      <span>{testimonial.ar_role}</span>
                     </div>
-                    <button className="admin-delete-button" onClick={() => deleteTestimonial(testimonial.id)} aria-label="حذف الشهادة"><Trash2 size={18} /></button>
+                    <div className="admin-order-actions">
+                      <button
+                        className="admin-icon-button"
+                        disabled={index === 0}
+                        onClick={() => moveTestimonial(testimonial, "up")}
+                        aria-label="تحريك لأعلى"
+                      >
+                        <ChevronUp size={17} />
+                      </button>
+                      <button
+                        className="admin-icon-button"
+                        disabled={index === testimonials.length - 1}
+                        onClick={() => moveTestimonial(testimonial, "down")}
+                        aria-label="تحريك لأسفل"
+                      >
+                        <ChevronDown size={17} />
+                      </button>
+                    </div>
+                    <button
+                      className="admin-delete-button"
+                      onClick={() => deleteTestimonial(testimonial.id)}
+                      aria-label="حذف الشهادة"
+                    >
+                      <Trash2 size={18} />
+                    </button>
                   </article>
                 ))}
               </div>
@@ -639,16 +1003,62 @@ export default function Admin() {
         {view === "about" && (
           <section className="admin-table-panel">
             <div className="admin-panel-heading">
-              <div><span className="admin-kicker">ABOUT THE STUDIO</span><h2>محتوى قسم من نحن</h2></div>
+              <div>
+                <span className="admin-kicker">ABOUT THE STUDIO</span>
+                <h2>محتوى قسم من نحن</h2>
+              </div>
             </div>
             <form onSubmit={handleSaveAbout} className="admin-about-form">
-              <label>العنوان بالعربية<input required value={aboutForm.ar_title} onChange={(event) => setAboutForm({ ...aboutForm, ar_title: event.target.value })} /></label>
-              <label>العنوان بالإنجليزية<input required value={aboutForm.en_title} onChange={(event) => setAboutForm({ ...aboutForm, en_title: event.target.value })} /></label>
-              <label>النص بالعربية<textarea required value={aboutForm.ar_text} onChange={(event) => setAboutForm({ ...aboutForm, ar_text: event.target.value })} /></label>
-              <label>النص بالإنجليزية<textarea required value={aboutForm.en_text} onChange={(event) => setAboutForm({ ...aboutForm, en_text: event.target.value })} /></label>
-              <button className="admin-primary-button" type="submit"><Save size={18} /> حفظ التعديلات</button>
-              <label className="admin-about-image-upload">صورة قسم من نحن<span>صورة مناسبة للعرض على اللابتوب، حتى 5MB</span><input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleAboutImageUpload} /></label>
-              {aboutForm.image_url && <img className="admin-about-image-preview" src={aboutForm.image_url} alt="معاينة صورة قسم من نحن" />}
+              <label>
+                العنوان بالعربية
+                <input
+                  required
+                  value={aboutForm.ar_title}
+                  onChange={(event) => setAboutForm({ ...aboutForm, ar_title: event.target.value })}
+                />
+              </label>
+              <label>
+                العنوان بالإنجليزية
+                <input
+                  required
+                  value={aboutForm.en_title}
+                  onChange={(event) => setAboutForm({ ...aboutForm, en_title: event.target.value })}
+                />
+              </label>
+              <label>
+                النص بالعربية
+                <textarea
+                  required
+                  value={aboutForm.ar_text}
+                  onChange={(event) => setAboutForm({ ...aboutForm, ar_text: event.target.value })}
+                />
+              </label>
+              <label>
+                النص بالإنجليزية
+                <textarea
+                  required
+                  value={aboutForm.en_text}
+                  onChange={(event) => setAboutForm({ ...aboutForm, en_text: event.target.value })}
+                />
+              </label>
+              <button className="admin-primary-button" type="submit">
+                <Save size={18} /> حفظ التعديلات
+              </button>
+              <label className="admin-about-image-upload">
+                صورة قسم من نحن<span>صورة مناسبة للعرض على اللابتوب، حتى 5MB</span>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  onChange={handleAboutImageUpload}
+                />
+              </label>
+              {aboutForm.image_url && (
+                <img
+                  className="admin-about-image-preview"
+                  src={aboutForm.image_url}
+                  alt="معاينة صورة قسم من نحن"
+                />
+              )}
             </form>
           </section>
         )}

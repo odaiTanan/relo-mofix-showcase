@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS categories (
 -- Works table
 CREATE TABLE IF NOT EXISTS works (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    slug VARCHAR(120) NULL UNIQUE,
     ar_title VARCHAR(255) NOT NULL,
     en_title VARCHAR(255) NOT NULL,
     ar_type VARCHAR(100) NOT NULL,
@@ -40,12 +41,21 @@ CREATE TABLE IF NOT EXISTS works (
     class_name VARCHAR(50) NULL,
     category_id INT NULL,
     image_url VARCHAR(500) NULL,
+    result_value VARCHAR(120) NULL,
+    result_label VARCHAR(255) NULL,
+    problem TEXT NULL,
+    solution TEXT NULL,
+    testimonial TEXT NULL,
+    external_url VARCHAR(500) NULL,
+    embed_code TEXT NULL,
+    sort_order INT NOT NULL DEFAULT 0,
     created_by INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL,
     INDEX idx_class_name (class_name),
+    INDEX idx_works_sort_order (sort_order),
     INDEX idx_created_at (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
