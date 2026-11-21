@@ -16,6 +16,16 @@ function getInstagramUrls(embedCode: string | null | undefined) {
   ].map((url) => url.split(/[?#]/)[0].replace(/\/+$/, ""));
 }
 
+function getInstagramThumbnailUrl(embedCode: string | null | undefined) {
+  const reelUrl = getInstagramUrls(embedCode)[0];
+  if (!reelUrl) return null;
+
+  const match = reelUrl.match(/instagram\.com\/(reel|p|tv)\/([A-Za-z0-9_-]+)/i);
+  if (!match) return null;
+
+  return `https://www.instagram.com/${match[1]}/${match[2]}/media/?size=l`;
+}
+
 function getImageUrl(imageUrl: string | null | undefined) {
   if (!imageUrl) return logoUrl;
   if (/^https?:\/\//i.test(imageUrl)) return imageUrl;
@@ -169,7 +179,11 @@ export default function WorksPage() {
               >
                 <div className="work-visual work-visual--image">
                   <img
-                    src={getImageUrl(work.image_url)}
+                    src={
+                      work.image_url
+                        ? getImageUrl(work.image_url)
+                        : getInstagramThumbnailUrl(work.embed_code) || logoUrl
+                    }
                     alt={isArabic ? work.ar_title : work.en_title}
                     loading="lazy"
                     decoding="async"
