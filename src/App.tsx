@@ -428,14 +428,14 @@ function WorkPortfolio({
                 src={
                   work.image_url
                     ? getImageUrl(work.image_url)
-                    : getInstagramThumbnailUrl(work.embed_code) || logoAsset.url
+                    : getInstagramThumbnailUrl(work.embed_code) || undefined
                 }
                 alt={isArabic ? work.ar_title : work.en_title}
                 loading="lazy"
                 decoding="async"
                 onError={(event) => {
                   event.currentTarget.onerror = null;
-                  event.currentTarget.src = logoAsset.url;
+                  event.currentTarget.style.display = "none";
                 }}
               />
               {getInstagramUrls(work.embed_code).length > 0 && (
@@ -528,9 +528,21 @@ function WorkPortfolio({
                     allowFullScreen
                   />
                 ))}
-                {!getInstagramUrls(selectedWork.embed_code).length && selectedWork.image_url && (
-                  <img src={getImageUrl(selectedWork.image_url)} alt="" />
-                )}
+                {!getInstagramUrls(selectedWork.embed_code).length &&
+                  (selectedWork.image_url || getInstagramThumbnailUrl(selectedWork.embed_code)) && (
+                    <img
+                      src={
+                        selectedWork.image_url
+                          ? getImageUrl(selectedWork.image_url)
+                          : getInstagramThumbnailUrl(selectedWork.embed_code) || undefined
+                      }
+                      alt=""
+                      onError={(event) => {
+                        event.currentTarget.onerror = null;
+                        event.currentTarget.style.display = "none";
+                      }}
+                    />
+                  )}
               </div>
             </div>
           </section>
