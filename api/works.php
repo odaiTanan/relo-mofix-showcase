@@ -170,8 +170,7 @@ class WorksManager {
     // Get all works
     public function getAllWorks() {
         return $this->db->fetchAll(
-            "SELECT works.id, works.ar_title, works.en_title, works.ar_type, works.en_type,
-                    works.tag, works.category_id, works.image_url, works.created_at,
+            "SELECT works.*,
                     categories.slug AS category_slug,
                     categories.ar_name AS category_ar_name,
                     categories.en_name AS category_en_name
@@ -217,6 +216,16 @@ class WorksManager {
         $enType = $this->sanitize($data['en_type'] ?? '');
         $tag = $this->sanitize($data['tag']);
         $categoryId = $this->validateCategory($data['category_id']);
+        $slug = trim($data['slug'] ?? '');
+        $slug = preg_match('/^[a-z0-9-]+$/', $slug) ? $slug : null;
+        $resultValue = trim($data['result_value'] ?? '');
+        $resultLabel = trim($data['result_label'] ?? '');
+        $problem = trim($data['problem'] ?? '');
+        $solution = trim($data['solution'] ?? '');
+        $testimonial = trim($data['testimonial'] ?? '');
+        $externalUrl = trim($data['external_url'] ?? '');
+        $embedCode = trim($data['embed_code'] ?? '');
+        $sortOrder = intval($data['sort_order'] ?? 0);
 
         // Handle image upload
         $imageUrl = null;
@@ -230,9 +239,13 @@ class WorksManager {
 
         // Insert into database
         $this->db->execute(
-            "INSERT INTO works (ar_title, en_title, ar_type, en_type, tag, category_id, image_url, created_by, created_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())",
-            [$arTitle, $enTitle, $arType, $enType, $tag, $categoryId, $imageUrl, $user['user_id']]
+            "INSERT INTO works (slug, ar_title, en_title, ar_type, en_type, tag, category_id, image_url,
+                                result_value, result_label, problem, solution, testimonial, external_url,
+                                embed_code, sort_order, created_by, created_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())",
+            [$slug, $arTitle, $enTitle, $arType, $enType, $tag, $categoryId, $imageUrl,
+             $resultValue ?: null, $resultLabel ?: null, $problem ?: null, $solution ?: null,
+             $testimonial ?: null, $externalUrl ?: null, $embedCode ?: null, $sortOrder, $user['user_id']]
         );
 
         return [
@@ -313,6 +326,25 @@ class WorksManager {
         if (!empty($data['category_id'])) {
             $updates[] = "category_id = ?";
             $params[] = $this->validateCategory($data['category_id']);
+        }
+
+        $optionalTextFields = [
+            'slug', 'result_value', 'result_label', 'problem', 'solution',
+            'testimonial', 'external_url', 'embed_code'
+        ];
+        foreach ($optionalTextFields as $field) {
+            if (array_key_exists($field, $data)) {
+                $value = trim((string) $data[$field]);
+                if ($field === 'slug') {
+                    $value = preg_match('/^[a-z0-9-]+$/', $value) ? $value : null;
+                }
+                $updates[] = "$field = ?";
+                $params[] = $value !== '' ? $value : null;
+            }
+        }
+        if (array_key_exists('sort_order', $data)) {
+            $updates[] = "sort_order = ?";
+            $params[] = intval($data['sort_order']);
         }
 
         // Handle image upload

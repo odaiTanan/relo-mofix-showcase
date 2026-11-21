@@ -344,10 +344,10 @@ function getInstagramUrls(embedCode: string | null | undefined) {
   return [
     ...new Set(
       (embedCode || "").match(
-        /https?:\/\/(?:www\.)?instagram\.com\/(?:reel|p|tv)\/[A-Za-z0-9_-]+/gi,
+        /https?:\/\/(?:www\.)?instagram\.com\/(?:reel|p|tv)\/[A-Za-z0-9_-]+(?:\/[^"'<> \t\r\n]*)?/gi,
       ) || [],
     ),
-  ];
+  ].map((url) => url.split(/[?#]/)[0].replace(/\/+$/, ""));
 }
 
 function WorkPortfolio({
@@ -511,6 +511,7 @@ function WorkPortfolio({
                     title={isArabic ? "ريل من إنستغرام" : "Instagram reel"}
                     loading="lazy"
                     allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                    allowFullScreen
                   />
                 ))}
                 {!getInstagramUrls(selectedWork.embed_code).length && selectedWork.image_url && (
