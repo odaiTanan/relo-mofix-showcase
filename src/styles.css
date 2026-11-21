@@ -1159,6 +1159,7 @@ button {
   width: max-content;
   height: 150px;
   direction: ltr;
+  animation: clientLogoMarquee 36s linear infinite;
   will-change: transform;
 }
 .clients-carousel__set {
@@ -2677,6 +2678,7 @@ footer a {
 @media (max-width: 620px) {
   .clients-carousel__track {
     height: 118px;
+    animation-duration: 45s;
   }
   .clients-carousel__slide {
     flex-basis: 170px;
