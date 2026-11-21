@@ -617,7 +617,9 @@ function Website() {
       document.documentElement.classList.contains("dark"),
   );
   const [menuOpen, setMenuOpen] = useState(false);
-  const [language, setLanguage] = useState<"ar" | "en">("ar");
+  const [language, setLanguage] = useState<"ar" | "en">(
+    () => (localStorage.getItem("relo-language") === "en" ? "en" : "ar"),
+  );
   const [scrolled, setScrolled] = useState(false);
   const [works, setWorks] = useState<WorkRecord[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -654,6 +656,9 @@ function Website() {
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
     localStorage.setItem("relo-theme", dark ? "dark" : "light");
+    localStorage.setItem("relo-language", language);
+    document.documentElement.lang = language;
+    document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
     updateSeoMetadata(language);
   }, [dark, language]);
 
@@ -737,7 +742,9 @@ function Website() {
             type="button"
             className="language-toggle"
             onClick={() => {
-              setLanguage(isArabic ? "en" : "ar");
+              const nextLanguage = isArabic ? "en" : "ar";
+              setLanguage(nextLanguage);
+              localStorage.setItem("relo-language", nextLanguage);
               setMenuOpen(false);
             }}
             aria-label={isArabic ? "Switch to English" : "التبديل إلى العربية"}

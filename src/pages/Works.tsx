@@ -27,7 +27,9 @@ function getImageUrl(imageUrl: string | null | undefined) {
 export default function WorksPage() {
   const navigate = useNavigate();
   const { slug } = useParams();
-  const [language, setLanguage] = useState<"ar" | "en">("ar");
+  const [language, setLanguage] = useState<"ar" | "en">(
+    () => (localStorage.getItem("relo-language") === "en" ? "en" : "ar"),
+  );
   const [works, setWorks] = useState<WorkRecord[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [filter, setFilter] = useState("all");
@@ -56,6 +58,14 @@ export default function WorksPage() {
   useEffect(() => {
     document.documentElement.lang = language;
     document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
+    localStorage.setItem("relo-language", language);
+  }, [language]);
+
+  useEffect(() => {
+    document.querySelector<HTMLMainElement>(".works-page")?.setAttribute(
+      "dir",
+      language === "ar" ? "rtl" : "ltr",
+    );
   }, [language]);
 
   const filteredWorks = useMemo(() => {
@@ -135,7 +145,11 @@ export default function WorksPage() {
           <button
             type="button"
             className="works-language"
-            onClick={() => setLanguage(isArabic ? "en" : "ar")}
+            onClick={() => {
+              const nextLanguage = isArabic ? "en" : "ar";
+              setLanguage(nextLanguage);
+              localStorage.setItem("relo-language", nextLanguage);
+            }}
           >
             {isArabic ? "EN" : "AR"}
           </button>
