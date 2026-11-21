@@ -1174,6 +1174,9 @@ button {
   animation-delay: var(--ticker-delay);
   will-change: transform;
 }
+.clients-carousel__slide--duplicate {
+  display: none;
+}
 .clients-carousel__slide img {
   width: 170px;
   height: 78px;
@@ -1530,6 +1533,14 @@ footer a {
   }
   to {
     transform: translate3d(-190px, 0, 0);
+  }
+}
+@keyframes clientLogoMarqueeMobile {
+  from {
+    transform: translate3d(100vw, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
   }
 }
 
@@ -2683,14 +2694,24 @@ footer a {
 
 @media (max-width: 620px) {
   .clients-carousel__track {
+    display: flex;
+    width: max-content;
+    min-width: 200%;
     height: 126px;
+    animation: clientLogoMarqueeMobile 24s linear infinite;
+    will-change: transform;
   }
   .clients-carousel__slide {
+    position: relative;
+    left: auto;
+    flex: 0 0 190px;
     width: 190px;
     height: 126px;
     padding: 20px 30px;
-    animation-name: clientLogoTravelMobile;
-    animation-duration: 24s;
+    animation: none;
+  }
+  .clients-carousel__slide--duplicate {
+    display: grid;
   }
   .clients-carousel__slide img {
     width: 130px;
