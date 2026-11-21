@@ -2,39 +2,16 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, ArrowUpLeft, ChevronLeft, ChevronRight, ExternalLink, MessageCircle, Play, X } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import logoUrl from "../assets/relo-mofix-logo-new.png";
-import { api, WorkRecord } from "../lib/api";
+import { api, Category, WorkRecord } from "../lib/api";
 import { getInstagramUrls, getWorkCoverSources, resolveLocalImageUrl } from "../lib/work-media";
 import { WorkCoverImage } from "../components/WorkCoverImage";
 
 const WHATSAPP_NUMBER = "963997596503";
 
-const workFilters = [
-  { id: "all", ar: "الكل", en: "All" },
-  { id: "reels", ar: "فيديو وريلز", en: "Video & Reels" },
-  { id: "branding", ar: "هوية بصرية", en: "Brand Identity" },
-  { id: "design", ar: "تصميم", en: "Design" },
-  { id: "ads", ar: "إعلانات ممولة", en: "Paid Ads" },
-  { id: "digital", ar: "مواقع وتطبيقات", en: "Web & Apps" },
-] as const;
-
 function matchesWorkFilter(work: WorkRecord, filter: string) {
   if (filter === "all") return true;
   if (filter === "reels") return Boolean(work.embed_code?.trim());
-
-  const searchable = [
-    work.category_slug,
-    work.category_ar_name,
-    work.category_en_name,
-    work.ar_type,
-    work.en_type,
-    work.tag,
-  ].join(" ").toLowerCase();
-
-  if (filter === "branding") return /brand|هوية|identity|براند/.test(searchable);
-  if (filter === "design") return /design|تصميم|جرافيك|print|مطبوع/.test(searchable);
-  if (filter === "ads") return /ad|ads|اعلان|إعلان|ممولة|campaign/.test(searchable);
-  if (filter === "digital") return /web|site|website|app|موقع|تطبيق|ويب/.test(searchable);
-  return true;
+  return String(work.category_id) === filter;
 }
 
 function getWhatsAppUrl(projectName: string) {
@@ -52,14 +29,16 @@ export default function WorksPage() {
   const { slug } = useParams();
   const [language, setLanguage] = useState<"ar" | "en">("ar");
   const [works, setWorks] = useState<WorkRecord[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [filter, setFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [selectedWorkState, setSelectedWorkState] = useState<WorkRecord | null>(null);
 
   useEffect(() => {
     Promise.all([api.getWorks(), api.getCategories()])
-      .then(([worksResponse]) => {
+      .then(([worksResponse, categoriesResponse]) => {
         if (worksResponse.success) setWorks(worksResponse.data || []);
+        if (categoriesResponse.success) setCategories(categoriesResponse.data || []);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -154,14 +133,30 @@ export default function WorksPage() {
 
       <section className="works-page-content">
         <div className="works-page-filters" role="group" aria-label="Work filters">
-          {workFilters.map((item) => (
+          <button
+            type="button"
+            className={filter === "all" ? "active" : ""}
+            onClick={() => setFilter("all")}
+          >
+            {isArabic ? "الكل" : "All"}
+          </button>
+          {works.some((work) => Boolean(work.embed_code?.trim())) && (
             <button
               type="button"
-              key={item.id}
-              className={filter === item.id ? "active" : ""}
-              onClick={() => setFilter(item.id)}
+              className={filter === "reels" ? "active" : ""}
+              onClick={() => setFilter("reels")}
             >
-              {isArabic ? item.ar : item.en}
+              {isArabic ? "فيديو وريلز" : "Video & Reels"}
+            </button>
+          )}
+          {categories.map((category) => (
+            <button
+              type="button"
+              key={category.id}
+              className={filter === String(category.id) ? "active" : ""}
+              onClick={() => setFilter(String(category.id))}
+            >
+              {isArabic ? category.ar_name : category.en_name}
             </button>
           ))}
         </div>
