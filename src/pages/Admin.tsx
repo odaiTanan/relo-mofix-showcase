@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { AboutContent, api, Category, ClientLogo, Testimonial } from "../lib/api";
+import { resolveLocalImageUrl } from "../lib/work-media";
 
 interface WorkItem {
   id: string;
@@ -701,7 +702,7 @@ export default function Admin() {
                       <div className="admin-work-image">
                         {work.image_url || work.thumbnail_url ? (
                           <img
-                            src={work.image_url || work.thumbnail_url || ""}
+                            src={resolveLocalImageUrl(work.image_url || work.thumbnail_url || "")}
                             alt={work.ar_title}
                             referrerPolicy="no-referrer"
                           />

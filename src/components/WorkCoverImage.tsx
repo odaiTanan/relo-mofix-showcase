@@ -4,10 +4,12 @@ type WorkCoverImageProps = {
   sources: string[];
   alt: string;
   className?: string;
+  /** Instagram reel/post URL — used as last-resort card preview when image sources fail */
+  embedUrl?: string | null;
 };
 
-/** Tries cover sources in order; Instagram CDN needs no-referrer to load. */
-export function WorkCoverImage({ sources, alt, className }: WorkCoverImageProps) {
+/** Tries cover sources in order; falls back to a clipped Instagram embed if needed. */
+export function WorkCoverImage({ sources, alt, className, embedUrl }: WorkCoverImageProps) {
   const [index, setIndex] = useState(0);
   const sourcesKey = sources.join("|");
 
@@ -16,7 +18,22 @@ export function WorkCoverImage({ sources, alt, className }: WorkCoverImageProps)
   }, [sourcesKey]);
 
   const src = sources[index];
-  if (!src) return null;
+
+  if (!src) {
+    if (embedUrl) {
+      return (
+        <iframe
+          className={`work-cover-embed ${className || ""}`.trim()}
+          src={`${embedUrl}/embed`}
+          title={alt}
+          loading="lazy"
+          tabIndex={-1}
+          aria-hidden="true"
+        />
+      );
+    }
+    return null;
+  }
 
   return (
     <img

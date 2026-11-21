@@ -27,14 +27,23 @@ export function resolveLocalImageUrl(imageUrl: string, fallbackOrigin?: string) 
   return new URL(imageUrl, `${apiOrigin}/`).toString();
 }
 
+function resolveMaybeLocal(
+  url: string,
+  resolveUploaded: (url: string) => string,
+): string {
+  // Local API paths (/uploads/...) must go through the API origin resolver
+  if (/^https?:\/\//i.test(url)) return url;
+  return resolveUploaded(url);
+}
+
 /** Cover candidates for a work: uploaded image → API thumbnail → Instagram media URL */
 export function getWorkCoverSources(
   work: Pick<WorkRecord, "image_url" | "thumbnail_url" | "embed_code">,
   resolveUploaded: (url: string) => string = resolveLocalImageUrl,
 ): string[] {
   const sources: string[] = [];
-  if (work.image_url) sources.push(resolveUploaded(work.image_url));
-  if (work.thumbnail_url) sources.push(work.thumbnail_url);
+  if (work.image_url) sources.push(resolveMaybeLocal(work.image_url, resolveUploaded));
+  if (work.thumbnail_url) sources.push(resolveMaybeLocal(work.thumbnail_url, resolveUploaded));
   const igThumb = getInstagramThumbnailUrl(work.embed_code);
   if (igThumb) sources.push(igThumb);
   return [...new Set(sources.filter(Boolean))];
