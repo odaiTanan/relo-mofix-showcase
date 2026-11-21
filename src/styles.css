@@ -1170,7 +1170,7 @@ button {
   display: grid;
   place-items: center;
   padding: 24px 30px;
-  animation: clientLogoTravel 28s linear infinite;
+  animation: clientLogoTravel 24s linear infinite;
   animation-delay: var(--ticker-delay);
   will-change: transform;
 }
@@ -1522,6 +1522,14 @@ footer a {
   }
   to {
     transform: translate3d(-100%, 0, 0);
+  }
+}
+@keyframes clientLogoTravelMobile {
+  from {
+    transform: translate3d(calc(100vw + 24px), 0, 0);
+  }
+  to {
+    transform: translate3d(-190px, 0, 0);
   }
 }
 
@@ -2675,12 +2683,14 @@ footer a {
 
 @media (max-width: 620px) {
   .clients-carousel__track {
-    height: 118px;
+    height: 126px;
   }
   .clients-carousel__slide {
-    width: 150px;
-    height: 118px;
-    padding: 14px 18px;
+    width: 190px;
+    height: 126px;
+    padding: 20px 30px;
+    animation-name: clientLogoTravelMobile;
+    animation-duration: 24s;
   }
   .clients-carousel__slide img {
     width: 130px;

@@ -535,7 +535,7 @@ function ClientCarousel({ clients }: { clients: ClientLogo[] }) {
     return new URL(imageUrl, `${apiOrigin}/`).toString();
   };
 
-  const tickerDuration = 28;
+  const tickerDuration = 24;
 
   return (
     <div className="clients-carousel" aria-label="شعارات العملاء">
