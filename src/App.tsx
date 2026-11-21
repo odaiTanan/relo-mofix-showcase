@@ -551,7 +551,12 @@ function ClientCarousel({ clients }: { clients: ClientLogo[] }) {
               }
               key={client.id}
             >
-              <img src={getImageUrl(client.logo_url)} alt="شعار عميل" />
+              <img
+                src={getImageUrl(client.logo_url)}
+                alt="شعار عميل"
+                loading="lazy"
+                decoding="async"
+              />
             </div>
           ))}
         </div>

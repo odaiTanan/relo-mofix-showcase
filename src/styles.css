@@ -2400,6 +2400,26 @@ footer a {
 }
 
 @media (max-width: 620px) {
+  .clients-carousel__track {
+    height: auto;
+    min-height: 150px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    direction: rtl;
+  }
+  .clients-carousel__slide {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: 100%;
+    height: 110px;
+    padding: 16px;
+    animation: none;
+  }
+  .clients-carousel__slide img {
+    width: min(130px, 80%);
+    height: 68px;
+  }
   .works-page-header {
     height: 70px;
   }
