@@ -632,16 +632,13 @@ button {
 }
 .work-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 54px 24px;
-}
-.work-card:nth-child(even) {
-  margin-top: 90px;
-}
-.work-carousel .work-card {
-  margin-top: 0;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 34px 24px;
+  align-items: start;
 }
 .work-card-button {
+  width: 100%;
+  min-width: 0;
   display: block;
   padding: 0;
   border: 0;
@@ -649,9 +646,19 @@ button {
   color: inherit;
   text-align: start;
   cursor: pointer;
+  transition:
+    transform 0.25s ease,
+    filter 0.25s ease;
+}
+.work-card-button:hover {
+  transform: translateY(-6px);
+}
+.work-card-button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 6px;
 }
 .work-card-button:hover .work-visual img {
-  transform: scale(1.035);
+  filter: saturate(1.05) contrast(1.02);
 }
 .work-card-meta {
   position: relative;
@@ -2448,10 +2455,8 @@ footer a {
     font-size: 22px;
   }
   .work-grid {
-    gap: 38px;
-  }
-  .work-card:nth-child(even) {
-    margin-top: 50px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 34px 20px;
   }
   .work-carousel__slide {
     width: 100%;
@@ -2522,9 +2527,7 @@ footer a {
   }
   .work-grid {
     grid-template-columns: 1fr;
-  }
-  .work-card:nth-child(even) {
-    margin-top: 0;
+    gap: 28px;
   }
   .work-carousel__slide {
     width: 100%;
