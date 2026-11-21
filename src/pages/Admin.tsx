@@ -37,6 +37,7 @@ interface WorkItem {
   testimonial?: string | null;
   external_url?: string | null;
   embed_code?: string | null;
+  thumbnail_url?: string | null;
   sort_order?: number;
 }
 
@@ -698,8 +699,12 @@ export default function Admin() {
                   {visibleWorks.map((work) => (
                     <article className="admin-work-item" key={work.id}>
                       <div className="admin-work-image">
-                        {work.image_url ? (
-                          <img src={work.image_url} alt={work.ar_title} />
+                        {work.image_url || work.thumbnail_url ? (
+                          <img
+                            src={work.image_url || work.thumbnail_url || ""}
+                            alt={work.ar_title}
+                            referrerPolicy="no-referrer"
+                          />
                         ) : (
                           <ImageIcon size={22} />
                         )}

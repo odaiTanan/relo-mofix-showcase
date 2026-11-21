@@ -32,6 +32,8 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import Login from "./pages/Login";
 import Admin from "./pages/Admin";
 import { AboutContent, api, Category, ClientLogo, Testimonial, WorkRecord } from "./lib/api";
+import { getInstagramUrls, getWorkCoverSources } from "./lib/work-media";
+import { WorkCoverImage } from "./components/WorkCoverImage";
 import logoUrl from "./assets/relo-mofix-logo-new.png";
 import wavesUrl from "./assets/relo-mofix-hero-new.jpg";
 import hussainUrl from "./assets/hussain-keton.PNG";
@@ -340,26 +342,6 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
 }
 
-function getInstagramUrls(embedCode: string | null | undefined) {
-  return [
-    ...new Set(
-      (embedCode || "").match(
-        /https?:\/\/(?:www\.)?instagram\.com\/(?:reel|p|tv)\/[A-Za-z0-9_-]+(?:\/[^"'<> \t\r\n]*)?/gi,
-      ) || [],
-    ),
-  ].map((url) => url.split(/[?#]/)[0].replace(/\/+$/, ""));
-}
-
-function getInstagramThumbnailUrl(embedCode: string | null | undefined) {
-  const reelUrl = getInstagramUrls(embedCode)[0];
-  if (!reelUrl) return null;
-
-  const match = reelUrl.match(/instagram\.com\/(reel|p|tv)\/([A-Za-z0-9_-]+)/i);
-  if (!match) return null;
-
-  return `https://www.instagram.com/${match[1]}/${match[2]}/media/?size=l`;
-}
-
 function WorkPortfolio({
   works,
   isArabic,
@@ -424,19 +406,9 @@ function WorkPortfolio({
             onClick={() => openWork(work)}
           >
             <div className="work-visual work-visual--image">
-              <img
-                src={
-                  work.image_url
-                    ? getImageUrl(work.image_url)
-                    : work.thumbnail_url || getInstagramThumbnailUrl(work.embed_code) || undefined
-                }
+              <WorkCoverImage
+                sources={getWorkCoverSources(work, getImageUrl)}
                 alt={isArabic ? work.ar_title : work.en_title}
-                loading="lazy"
-                decoding="async"
-                onError={(event) => {
-                  event.currentTarget.onerror = null;
-                  event.currentTarget.style.display = "none";
-                }}
               />
               {getInstagramUrls(work.embed_code).length > 0 && (
                 <span className="work-card-play">
@@ -529,21 +501,8 @@ function WorkPortfolio({
                   />
                 ))}
                 {!getInstagramUrls(selectedWork.embed_code).length &&
-                  (selectedWork.image_url || getInstagramThumbnailUrl(selectedWork.embed_code)) && (
-                    <img
-                      src={
-                        selectedWork.image_url
-                          ? getImageUrl(selectedWork.image_url)
-                          : selectedWork.thumbnail_url ||
-                            getInstagramThumbnailUrl(selectedWork.embed_code) ||
-                            undefined
-                      }
-                      alt=""
-                      onError={(event) => {
-                        event.currentTarget.onerror = null;
-                        event.currentTarget.style.display = "none";
-                      }}
-                    />
+                  getWorkCoverSources(selectedWork, getImageUrl).length > 0 && (
+                    <WorkCoverImage sources={getWorkCoverSources(selectedWork, getImageUrl)} alt="" />
                   )}
               </div>
             </div>

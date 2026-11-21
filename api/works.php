@@ -167,6 +167,55 @@ class WorksManager {
         return $mimeMap[$mimeType] ?? 'jpg';
     }
 
+    private function curlGet($url, $nobody = false) {
+        if (!function_exists('curl_init')) {
+            return null;
+        }
+
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS => 5,
+            CURLOPT_TIMEOUT => 8,
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36',
+            CURLOPT_HTTPHEADER => [
+                'Accept: text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8',
+                'Accept-Language: en-US,en;q=0.9',
+            ],
+            CURLOPT_NOBODY => $nobody,
+        ]);
+        $body = curl_exec($ch);
+        $status = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
+        $effective = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
+        curl_close($ch);
+
+        return [
+            'body' => $body,
+            'status' => $status,
+            'effective' => $effective,
+        ];
+    }
+
+    private function extractOgImage($html) {
+        if (empty($html)) {
+            return null;
+        }
+
+        if (preg_match('/<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)["\']/i', $html, $imageMatch) ||
+            preg_match('/<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:image["\']/i', $html, $imageMatch) ||
+            preg_match('/"thumbnail_url"\s*:\s*"([^"]+)"/i', $html, $imageMatch) ||
+            preg_match('/"display_url"\s*:\s*"([^"]+)"/i', $html, $imageMatch)) {
+            $thumbnail = html_entity_decode($imageMatch[1], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            $thumbnail = stripcslashes($thumbnail);
+            return filter_var($thumbnail, FILTER_VALIDATE_URL) ? $thumbnail : null;
+        }
+
+        return null;
+    }
+
     private function getInstagramThumbnail($embedCode) {
         if (empty($embedCode) || !preg_match(
             '/https?:\/\/(?:www\.)?instagram\.com\/(?:reel|p|tv)\/[A-Za-z0-9_-]+/i',
@@ -177,32 +226,35 @@ class WorksManager {
         }
 
         $url = rtrim($matches[0], '/');
-        if (!function_exists('curl_init')) {
-            return null;
+
+        // 1) Follow /media/?size=l redirect to CDN image
+        $media = $this->curlGet($url . '/media/?size=l');
+        if ($media && !empty($media['effective'])) {
+            $effective = $media['effective'];
+            if (preg_match('/cdninstagram\.com|fbcdn\.net|\.(jpe?g|png|webp)(\?|$)/i', $effective)) {
+                return $effective;
+            }
         }
 
-        $ch = curl_init();
-        curl_setopt_array($ch, [
-            CURLOPT_URL => $url,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_MAXREDIRS => 3,
-            CURLOPT_TIMEOUT => 8,
-            CURLOPT_CONNECTTIMEOUT => 5,
-            CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36',
-        ]);
-        $html = curl_exec($ch);
-        $status = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
-        curl_close($ch);
-
-        if ($status < 200 || $status >= 400 || empty($html)) {
-            return null;
+        // 2) og:image from post page, then embed page
+        foreach ([$url, $url . '/embed/captioned/', $url . '/embed/'] as $candidate) {
+            $response = $this->curlGet($candidate);
+            if (!$response || $response['status'] < 200 || $response['status'] >= 400) {
+                continue;
+            }
+            $thumbnail = $this->extractOgImage($response['body']);
+            if ($thumbnail) {
+                return $thumbnail;
+            }
         }
 
-        if (preg_match('/<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)["\']/i', $html, $imageMatch) ||
-            preg_match('/<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:image["\']/i', $html, $imageMatch)) {
-            $thumbnail = html_entity_decode($imageMatch[1], ENT_QUOTES | ENT_HTML5, 'UTF-8');
-            return filter_var($thumbnail, FILTER_VALIDATE_URL) ? $thumbnail : null;
+        // 3) Public oEmbed endpoint (works for some public posts)
+        $oembed = $this->curlGet('https://www.instagram.com/api/v1/oembed/?url=' . rawurlencode($url));
+        if ($oembed && $oembed['status'] >= 200 && $oembed['status'] < 400 && !empty($oembed['body'])) {
+            $json = json_decode($oembed['body'], true);
+            if (!empty($json['thumbnail_url']) && filter_var($json['thumbnail_url'], FILTER_VALIDATE_URL)) {
+                return $json['thumbnail_url'];
+            }
         }
 
         return null;
@@ -214,7 +266,12 @@ class WorksManager {
         }
 
         foreach ($works as &$work) {
-            $work['thumbnail_url'] = $this->getInstagramThumbnail($work['embed_code'] ?? null);
+            // Only resolve thumbnails for reels without an uploaded cover image
+            if (!empty($work['image_url']) || empty($work['embed_code'])) {
+                $work['thumbnail_url'] = null;
+                continue;
+            }
+            $work['thumbnail_url'] = $this->getInstagramThumbnail($work['embed_code']);
         }
         unset($work);
         return $works;
@@ -250,7 +307,9 @@ class WorksManager {
             [$id]
         );
         if ($work) {
-            $work['thumbnail_url'] = $this->getInstagramThumbnail($work['embed_code'] ?? null);
+            $work['thumbnail_url'] = empty($work['image_url']) && !empty($work['embed_code'])
+                ? $this->getInstagramThumbnail($work['embed_code'])
+                : null;
         }
         return $work;
     }

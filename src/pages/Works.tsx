@@ -3,35 +3,14 @@ import { ArrowLeft, ArrowUpLeft, ExternalLink, Play, X } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import logoUrl from "../assets/relo-mofix-logo-new.png";
 import { api, Category, WorkRecord } from "../lib/api";
+import { getInstagramUrls, getWorkCoverSources, resolveLocalImageUrl } from "../lib/work-media";
+import { WorkCoverImage } from "../components/WorkCoverImage";
 
 const PAGE_SIZE = 12;
 
-function getInstagramUrls(embedCode: string | null | undefined) {
-  return [
-    ...new Set(
-      (embedCode || "").match(
-        /https?:\/\/(?:www\.)?instagram\.com\/(?:reel|p|tv)\/[A-Za-z0-9_-]+(?:\/[^"'<> \t\r\n]*)?/gi,
-      ) || [],
-    ),
-  ].map((url) => url.split(/[?#]/)[0].replace(/\/+$/, ""));
-}
-
-function getInstagramThumbnailUrl(embedCode: string | null | undefined) {
-  const reelUrl = getInstagramUrls(embedCode)[0];
-  if (!reelUrl) return null;
-
-  const match = reelUrl.match(/instagram\.com\/(reel|p|tv)\/([A-Za-z0-9_-]+)/i);
-  if (!match) return null;
-
-  return `https://www.instagram.com/${match[1]}/${match[2]}/media/?size=l`;
-}
-
 function getImageUrl(imageUrl: string | null | undefined) {
   if (!imageUrl) return logoUrl;
-  if (/^https?:\/\//i.test(imageUrl)) return imageUrl;
-  const apiUrl = import.meta.env.VITE_API_URL || window.location.origin;
-  const apiOrigin = /^https?:\/\//i.test(apiUrl) ? new URL(apiUrl).origin : window.location.origin;
-  return new URL(imageUrl, `${apiOrigin}/`).toString();
+  return resolveLocalImageUrl(imageUrl);
 }
 
 export default function WorksPage() {
@@ -178,19 +157,9 @@ export default function WorksPage() {
                 onClick={() => openModal(work)}
               >
                 <div className="work-visual work-visual--image">
-                  <img
-                    src={
-                      work.image_url
-                        ? getImageUrl(work.image_url)
-                        : work.thumbnail_url || getInstagramThumbnailUrl(work.embed_code) || undefined
-                    }
+                  <WorkCoverImage
+                    sources={getWorkCoverSources(work, getImageUrl)}
                     alt={isArabic ? work.ar_title : work.en_title}
-                    loading="lazy"
-                    decoding="async"
-                    onError={(event) => {
-                      event.currentTarget.onerror = null;
-                      event.currentTarget.style.display = "none";
-                    }}
                   />
                   {getInstagramUrls(work.embed_code).length > 0 && (
                     <span className="work-card-play">
@@ -309,23 +278,8 @@ export default function WorksPage() {
                   />
                 ))}
                 {!getInstagramUrls(selectedWork.embed_code).length &&
-                  (selectedWork.image_url || getInstagramThumbnailUrl(selectedWork.embed_code)) && (
-                    <img
-                      src={
-                        selectedWork.image_url
-                          ? getImageUrl(selectedWork.image_url)
-                          : selectedWork.thumbnail_url ||
-                            getInstagramThumbnailUrl(selectedWork.embed_code) ||
-                            undefined
-                      }
-                      alt=""
-                      loading="lazy"
-                      decoding="async"
-                      onError={(event) => {
-                        event.currentTarget.onerror = null;
-                        event.currentTarget.style.display = "none";
-                      }}
-                    />
+                  getWorkCoverSources(selectedWork, getImageUrl).length > 0 && (
+                    <WorkCoverImage sources={getWorkCoverSources(selectedWork, getImageUrl)} alt="" />
                   )}
               </div>
             </div>
