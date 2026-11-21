@@ -10,16 +10,6 @@ export function getInstagramUrls(embedCode: string | null | undefined) {
   ].map((url) => url.split(/[?#]/)[0].replace(/\/+$/, ""));
 }
 
-export function getInstagramThumbnailUrl(embedCode: string | null | undefined) {
-  const reelUrl = getInstagramUrls(embedCode)[0];
-  if (!reelUrl) return null;
-
-  const match = reelUrl.match(/instagram\.com\/(reel|p|tv)\/([A-Za-z0-9_-]+)/i);
-  if (!match) return null;
-
-  return `https://www.instagram.com/${match[1]}/${match[2]}/media/?size=l`;
-}
-
 export function resolveLocalImageUrl(imageUrl: string, fallbackOrigin?: string) {
   if (/^https?:\/\//i.test(imageUrl)) return imageUrl;
   const apiUrl = fallbackOrigin || import.meta.env.VITE_API_URL || window.location.origin;
@@ -31,11 +21,11 @@ export function resolveLocalImageUrl(imageUrl: string, fallbackOrigin?: string) 
 export function getWorkCoverSources(
   work: Pick<WorkRecord, "image_url" | "thumbnail_url" | "embed_code">,
   resolveUploaded: (url: string) => string = resolveLocalImageUrl,
+  fallbackUrl?: string,
 ): string[] {
   const sources: string[] = [];
   if (work.image_url) sources.push(resolveUploaded(work.image_url));
   if (work.thumbnail_url) sources.push(work.thumbnail_url);
-  const igThumb = getInstagramThumbnailUrl(work.embed_code);
-  if (igThumb) sources.push(igThumb);
+  if (fallbackUrl) sources.push(fallbackUrl);
   return [...new Set(sources.filter(Boolean))];
 }

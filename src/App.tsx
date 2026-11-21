@@ -407,7 +407,7 @@ function WorkPortfolio({
           >
             <div className="work-visual work-visual--image">
               <WorkCoverImage
-                sources={getWorkCoverSources(work, getImageUrl)}
+                sources={getWorkCoverSources(work, getImageUrl, logoAsset.url)}
                 alt={isArabic ? work.ar_title : work.en_title}
               />
               {getInstagramUrls(work.embed_code).length > 0 && (
@@ -501,8 +501,11 @@ function WorkPortfolio({
                   />
                 ))}
                 {!getInstagramUrls(selectedWork.embed_code).length &&
-                  getWorkCoverSources(selectedWork, getImageUrl).length > 0 && (
-                    <WorkCoverImage sources={getWorkCoverSources(selectedWork, getImageUrl)} alt="" />
+                  getWorkCoverSources(selectedWork, getImageUrl, logoAsset.url).length > 0 && (
+                    <WorkCoverImage
+                      sources={getWorkCoverSources(selectedWork, getImageUrl, logoAsset.url)}
+                      alt=""
+                    />
                   )}
               </div>
             </div>

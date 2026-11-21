@@ -227,16 +227,7 @@ class WorksManager {
 
         $url = rtrim($matches[0], '/');
 
-        // 1) Follow /media/?size=l redirect to CDN image
-        $media = $this->curlGet($url . '/media/?size=l');
-        if ($media && !empty($media['effective'])) {
-            $effective = $media['effective'];
-            if (preg_match('/cdninstagram\.com|fbcdn\.net|\.(jpe?g|png|webp)(\?|$)/i', $effective)) {
-                return $effective;
-            }
-        }
-
-        // 2) og:image from post page, then embed page
+        // og:image from post page, then embed page
         foreach ([$url, $url . '/embed/captioned/', $url . '/embed/'] as $candidate) {
             $response = $this->curlGet($candidate);
             if (!$response || $response['status'] < 200 || $response['status'] >= 400) {

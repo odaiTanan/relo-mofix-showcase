@@ -158,7 +158,7 @@ export default function WorksPage() {
               >
                 <div className="work-visual work-visual--image">
                   <WorkCoverImage
-                    sources={getWorkCoverSources(work, getImageUrl)}
+                    sources={getWorkCoverSources(work, getImageUrl, logoUrl)}
                     alt={isArabic ? work.ar_title : work.en_title}
                   />
                   {getInstagramUrls(work.embed_code).length > 0 && (
@@ -278,8 +278,11 @@ export default function WorksPage() {
                   />
                 ))}
                 {!getInstagramUrls(selectedWork.embed_code).length &&
-                  getWorkCoverSources(selectedWork, getImageUrl).length > 0 && (
-                    <WorkCoverImage sources={getWorkCoverSources(selectedWork, getImageUrl)} alt="" />
+                  getWorkCoverSources(selectedWork, getImageUrl, logoUrl).length > 0 && (
+                    <WorkCoverImage
+                      sources={getWorkCoverSources(selectedWork, getImageUrl, logoUrl)}
+                      alt=""
+                    />
                   )}
               </div>
             </div>
