@@ -26,7 +26,7 @@ import {
   Sun,
   X,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import Login from "./pages/Login";
@@ -35,6 +35,8 @@ import { AboutContent, api, Category, ClientLogo, Testimonial, WorkRecord } from
 import logoUrl from "./assets/relo-mofix-logo-new.png";
 import wavesUrl from "./assets/relo-mofix-hero-new.jpg";
 import hussainUrl from "./assets/hussain-keton.PNG";
+
+const WorksPage = lazy(() => import("./pages/Works"));
 
 const logoAsset = { url: logoUrl };
 const wavesAsset = { url: wavesUrl };
@@ -415,6 +417,8 @@ function WorkPortfolio({
               <img
                 src={getImageUrl(work.image_url)}
                 alt={isArabic ? work.ar_title : work.en_title}
+                loading="lazy"
+                decoding="async"
                 onError={(event) => {
                   event.currentTarget.onerror = null;
                   event.currentTarget.src = logoAsset.url;
@@ -609,7 +613,6 @@ function Website() {
   const [dark, setDark] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [language, setLanguage] = useState<"ar" | "en">("ar");
-  const [filter, setFilter] = useState("all");
   const [scrolled, setScrolled] = useState(false);
   const [works, setWorks] = useState<WorkRecord[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -661,9 +664,7 @@ function Website() {
   }, []);
 
   const t = copy[language];
-  const visibleWork = (
-    filter === "all" ? works : works.filter((item) => String(item.category_id) === filter)
-  )
+  const visibleWork = works
     .slice()
     .sort((a, b) => Number(b.sort_order || 0) - Number(a.sort_order || 0));
   const isArabic = language === "ar";
@@ -931,31 +932,14 @@ function Website() {
               <span>.</span>
             </h2>
           </div>
-          <div
-            className="work-filters"
-            role="group"
-            aria-label={isArabic ? "تصنيف الأعمال" : "Work categories"}
-          >
-            <button
-              type="button"
-              onClick={() => setFilter("all")}
-              className={filter === "all" ? "active" : ""}
-            >
-              {isArabic ? "الكل" : "All"}
-            </button>
-            {categories.map((category) => (
-              <button
-                type="button"
-                onClick={() => setFilter(String(category.id))}
-                className={filter === String(category.id) ? "active" : ""}
-                key={category.id}
-              >
-                {isArabic ? category.ar_name : category.en_name}
-              </button>
-            ))}
-          </div>
         </div>
-        <WorkPortfolio works={visibleWork} isArabic={isArabic} logoAsset={logoAsset} />
+        <WorkPortfolio works={visibleWork.slice(0, 4)} isArabic={isArabic} logoAsset={logoAsset} />
+        <div className="work-more-wrap">
+          <a className="work-more-button" href="/works">
+            {isArabic ? "عرض جميع الأعمال" : "View all work"}
+            <ArrowUpLeft size={18} />
+          </a>
+        </div>
       </section>
 
       <section id="management" className="management">
@@ -1181,6 +1165,22 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Website />} />
+          <Route
+            path="/works"
+            element={
+              <Suspense fallback={<div className="works-route-loading">جاري تحميل الأعمال...</div>}>
+                <WorksPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/works/:slug"
+            element={
+              <Suspense fallback={<div className="works-route-loading">جاري تحميل الأعمال...</div>}>
+                <WorksPage />
+              </Suspense>
+            }
+          />
           <Route path="/login" element={<Login />} />
           <Route
             path="/admin"
