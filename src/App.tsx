@@ -535,22 +535,23 @@ function ClientCarousel({ clients }: { clients: ClientLogo[] }) {
     return new URL(imageUrl, `${apiOrigin}/`).toString();
   };
 
+  const tickerDuration = 28;
+
   return (
     <div className="clients-carousel" aria-label="شعارات العملاء">
       {clients.length > 0 && (
         <div className="clients-carousel__track">
-          {[0, 1].map((setIndex) => (
-            <div className="clients-carousel__set" key={setIndex} aria-hidden={setIndex > 0}>
-              {clients.map((client) => (
-                <div className="clients-carousel__slide" key={`${setIndex}-${client.id}`}>
-                  <img
-                    src={getImageUrl(client.logo_url)}
-                    alt={setIndex === 0 ? "شعار عميل" : ""}
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </div>
-              ))}
+          {clients.map((client, index) => (
+            <div
+              className="clients-carousel__slide"
+              style={
+                {
+                  "--ticker-delay": `${-((index * tickerDuration) / clients.length)}s`,
+                } as React.CSSProperties
+              }
+              key={client.id}
+            >
+              <img src={getImageUrl(client.logo_url)} alt="شعار عميل" />
             </div>
           ))}
         </div>
