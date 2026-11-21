@@ -33,6 +33,7 @@ export default function WorksPage() {
   const [filter, setFilter] = useState("all");
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [selectedWorkState, setSelectedWorkState] = useState<WorkRecord | null>(null);
 
   useEffect(() => {
     Promise.all([api.getWorks(), api.getCategories()])
@@ -61,23 +62,37 @@ export default function WorksPage() {
 
   const pageCount = Math.max(1, Math.ceil(filteredWorks.length / PAGE_SIZE));
   const visibleWorks = filteredWorks.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-  const selectedWork = slug
-    ? filteredWorks.find((work) => work.slug === slug) ||
-      works.find((work) => work.slug === slug) ||
-      null
-    : null;
+  const selectedWork =
+    selectedWorkState ||
+    (slug
+      ? filteredWorks.find((work) => work.slug === slug) ||
+        works.find((work) => work.slug === slug) ||
+        null
+      : null);
 
   useEffect(() => {
     if (!selectedWork) return;
     document.body.style.overflow = "hidden";
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setSelectedWorkState(null);
+        if (slug) navigate("/works");
+      }
+    };
+    document.addEventListener("keydown", closeOnEscape);
     return () => {
       document.body.style.overflow = "";
+      document.removeEventListener("keydown", closeOnEscape);
     };
-  }, [selectedWork]);
+  }, [navigate, selectedWork, slug]);
 
-  const closeModal = () => navigate("/works");
+  const closeModal = () => {
+    setSelectedWorkState(null);
+    if (slug) navigate("/works");
+  };
   const openModal = (work: WorkRecord) => {
-    if (work.slug) navigate(`/works/${work.slug}`);
+    setSelectedWorkState(work);
+    if (work.slug) navigate(`/works/${work.slug}`, { replace: false });
   };
 
   const isArabic = language === "ar";
