@@ -17,15 +17,6 @@ class WorksManager {
         return htmlspecialchars(strip_tags(trim($data)), ENT_QUOTES, 'UTF-8');
     }
 
-    private function optionalUrl($value) {
-        $value = trim((string) $value);
-        if ($value === '') return null;
-        if (!filter_var($value, FILTER_VALIDATE_URL) || !preg_match('/^https?:\/\//i', $value)) {
-            throw new Exception('Links must be valid HTTP or HTTPS URLs');
-        }
-        return $value;
-    }
-
     // Validate image upload
     private function validateImage($file) {
         $uploadError = $file['error'] ?? UPLOAD_ERR_NO_FILE;
@@ -180,16 +171,13 @@ class WorksManager {
     public function getAllWorks() {
         return $this->db->fetchAll(
             "SELECT works.id, works.ar_title, works.en_title, works.ar_type, works.en_type,
-                    works.tag, works.category_id, works.image_url, works.slug,
-                    works.result_value, works.result_label, works.problem, works.solution,
-                    works.testimonial, works.external_url, works.embed_code, works.sort_order,
-                    works.created_at,
+                    works.tag, works.category_id, works.image_url, works.created_at,
                     categories.slug AS category_slug,
                     categories.ar_name AS category_ar_name,
                     categories.en_name AS category_en_name
              FROM works
              LEFT JOIN categories ON categories.id = works.category_id
-             ORDER BY works.sort_order DESC, works.created_at DESC"
+             ORDER BY works.created_at DESC"
         );
     }
 
@@ -229,18 +217,6 @@ class WorksManager {
         $enType = $this->sanitize($data['en_type'] ?? '');
         $tag = $this->sanitize($data['tag']);
         $categoryId = $this->validateCategory($data['category_id']);
-        $slug = strtolower(trim($data['slug'] ?? ''));
-        if ($slug !== '' && !preg_match('/^[a-z0-9-]+$/', $slug)) {
-            throw new Exception('Project link must contain only lowercase letters, numbers, and hyphens');
-        }
-        $externalUrl = $this->optionalUrl($data['external_url'] ?? '');
-        $embedCode = trim((string) ($data['embed_code'] ?? ''));
-        $resultValue = $this->sanitize($data['result_value'] ?? '');
-        $resultLabel = $this->sanitize($data['result_label'] ?? '');
-        $problem = $this->sanitize($data['problem'] ?? '');
-        $solution = $this->sanitize($data['solution'] ?? '');
-        $testimonial = $this->sanitize($data['testimonial'] ?? '');
-        $sortOrder = intval($data['sort_order'] ?? 0);
 
         // Handle image upload
         $imageUrl = null;
@@ -254,12 +230,9 @@ class WorksManager {
 
         // Insert into database
         $this->db->execute(
-            "INSERT INTO works (slug, ar_title, en_title, ar_type, en_type, tag, category_id, image_url,
-             result_value, result_label, problem, solution, testimonial, external_url, embed_code, sort_order, created_by, created_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())",
-            [$slug ?: null, $arTitle, $enTitle, $arType, $enType, $tag, $categoryId, $imageUrl,
-             $resultValue ?: null, $resultLabel ?: null, $problem ?: null, $solution ?: null,
-             $testimonial ?: null, $externalUrl, $embedCode ?: null, $sortOrder, $user['user_id']]
+            "INSERT INTO works (ar_title, en_title, ar_type, en_type, tag, category_id, image_url, created_by, created_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())",
+            [$arTitle, $enTitle, $arType, $enType, $tag, $categoryId, $imageUrl, $user['user_id']]
         );
 
         return [
@@ -340,30 +313,6 @@ class WorksManager {
         if (!empty($data['category_id'])) {
             $updates[] = "category_id = ?";
             $params[] = $this->validateCategory($data['category_id']);
-        }
-        if (array_key_exists('slug', $data)) {
-            $slug = strtolower(trim($data['slug']));
-            if ($slug !== '' && !preg_match('/^[a-z0-9-]+$/', $slug)) throw new Exception('Invalid project link');
-            $updates[] = "slug = ?";
-            $params[] = $slug ?: null;
-        }
-        foreach (['result_value', 'result_label', 'problem', 'solution', 'testimonial'] as $field) {
-            if (array_key_exists($field, $data)) {
-                $updates[] = "$field = ?";
-                $params[] = $this->sanitize($data[$field]);
-            }
-        }
-        if (array_key_exists('external_url', $data)) {
-            $updates[] = "external_url = ?";
-            $params[] = $this->optionalUrl($data['external_url']);
-        }
-        if (array_key_exists('embed_code', $data)) {
-            $updates[] = "embed_code = ?";
-            $params[] = trim((string) $data['embed_code']) ?: null;
-        }
-        if (array_key_exists('sort_order', $data)) {
-            $updates[] = "sort_order = ?";
-            $params[] = intval($data['sort_order']);
         }
 
         // Handle image upload

@@ -1156,26 +1156,24 @@ button {
 }
 .clients-carousel__track {
   position: relative;
-  width: 100%;
+  display: flex;
+  width: max-content;
   height: 150px;
   direction: ltr;
-  overflow: hidden;
+  animation: clientLogoTravel 28s linear infinite;
+  will-change: transform;
 }
 .clients-carousel__slide {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: clamp(170px, 19vw, 260px);
+  position: relative;
+  flex: 0 0 clamp(150px, 19vw, 260px);
+  width: clamp(150px, 19vw, 260px);
   height: 150px;
   display: grid;
   place-items: center;
   padding: 24px 30px;
-  animation: clientLogoTravel 28s linear infinite;
-  animation-delay: var(--ticker-delay);
-  will-change: transform;
 }
 .clients-carousel__slide img {
-  width: 170px;
+  width: 150px;
   height: 78px;
   object-fit: contain;
   filter: grayscale(1);
@@ -1191,6 +1189,9 @@ button {
 }
 .clients-carousel__slide img:hover {
   transform: scale(1.04);
+}
+.clients-carousel:hover .clients-carousel__track {
+  animation-play-state: paused;
 }
 .testimonials-section {
   background: var(--secondary);
@@ -1518,10 +1519,10 @@ footer a {
 }
 @keyframes clientLogoTravel {
   from {
-    transform: translate3d(100vw, 0, 0);
+    transform: translate3d(0, 0, 0);
   }
   to {
-    transform: translate3d(-100%, 0, 0);
+    transform: translate3d(-50%, 0, 0);
   }
 }
 
@@ -2562,6 +2563,10 @@ footer a {
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
+  }
+  .clients-carousel__track {
+    animation: none !important;
+    transform: none;
   }
 }
 
