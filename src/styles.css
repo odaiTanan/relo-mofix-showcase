@@ -926,7 +926,8 @@ button {
   direction: rtl;
 }
 .works-language,
-.works-back-link {
+.works-back-link,
+.works-theme {
   min-height: 42px;
   display: inline-flex;
   align-items: center;
@@ -940,9 +941,15 @@ button {
   cursor: pointer;
 }
 .works-language:hover,
-.works-back-link:hover {
+.works-back-link:hover,
+.works-theme:hover {
   border-color: var(--primary);
   color: var(--primary);
+}
+.works-theme {
+  width: 42px;
+  height: 42px;
+  padding: 0;
 }
 .works-page-hero {
   min-height: 280px;
@@ -997,8 +1004,8 @@ button {
   justify-content: flex-end;
   overflow: hidden;
   border: 1px solid rgb(255 102 0 / 38%);
-  background: #0a0a0a;
-  color: #fff;
+  background: var(--surface-deep);
+  color: var(--surface-deep-text);
   padding: 28px;
   text-align: start;
   isolation: isolate;
@@ -1028,7 +1035,7 @@ button {
   position: absolute;
   top: 20px;
   inset-inline-end: 22px;
-  color: rgb(255 255 255 / 38%);
+  color: var(--surface-deep-muted);
   font: 500 12px var(--font-display);
   letter-spacing: 0.12em;
 }
@@ -1059,7 +1066,7 @@ button {
   line-height: 1;
 }
 .work-card-result small {
-  color: rgb(255 255 255 / 65%);
+  color: var(--surface-deep-muted);
   font-size: 12px;
 }
 .work-card--text .work-card-action {

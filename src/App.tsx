@@ -611,7 +611,11 @@ function TestimonialsCarousel({
 }
 
 function Website() {
-  const [dark, setDark] = useState(false);
+  const [dark, setDark] = useState(
+    () =>
+      localStorage.getItem("relo-theme") === "dark" ||
+      document.documentElement.classList.contains("dark"),
+  );
   const [menuOpen, setMenuOpen] = useState(false);
   const [language, setLanguage] = useState<"ar" | "en">("ar");
   const [scrolled, setScrolled] = useState(false);
@@ -649,6 +653,7 @@ function Website() {
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
+    localStorage.setItem("relo-theme", dark ? "dark" : "light");
     updateSeoMetadata(language);
   }, [dark, language]);
 

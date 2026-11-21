@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, ArrowUpLeft, ChevronLeft, ChevronRight, ExternalLink, MessageCircle, Play, X } from "lucide-react";
+import { ArrowLeft, ArrowUpLeft, ChevronLeft, ChevronRight, ExternalLink, MessageCircle, Moon, Play, Sun, X } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import logoUrl from "../assets/relo-mofix-logo-new.png";
 import { api, Category, WorkRecord } from "../lib/api";
@@ -33,6 +33,16 @@ export default function WorksPage() {
   const [filter, setFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [selectedWorkState, setSelectedWorkState] = useState<WorkRecord | null>(null);
+  const [dark, setDark] = useState(
+    () =>
+      localStorage.getItem("relo-theme") === "dark" ||
+      document.documentElement.classList.contains("dark"),
+  );
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", dark);
+    localStorage.setItem("relo-theme", dark ? "dark" : "light");
+  }, [dark]);
 
   useEffect(() => {
     Promise.all([api.getWorks(), api.getCategories()])
@@ -109,6 +119,19 @@ export default function WorksPage() {
           </span>
         </a>
         <div>
+          <button
+            type="button"
+            className="works-theme"
+            onClick={() => setDark((current) => !current)}
+            aria-label={dark
+              ? (isArabic ? "تفعيل الوضع الفاتح" : "Enable light mode")
+              : (isArabic ? "تفعيل الوضع الداكن" : "Enable dark mode")}
+            title={dark
+              ? (isArabic ? "الوضع الفاتح" : "Light mode")
+              : (isArabic ? "الوضع الداكن" : "Dark mode")}
+          >
+            {dark ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
           <button
             type="button"
             className="works-language"
