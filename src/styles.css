@@ -1537,7 +1537,7 @@ footer a {
 }
 @keyframes clientLogoMarqueeMobile {
   from {
-    transform: translate3d(100vw, 0, 0);
+    transform: translate3d(0, 0, 0);
   }
   to {
     transform: translate3d(-50%, 0, 0);
@@ -2696,7 +2696,6 @@ footer a {
   .clients-carousel__track {
     display: flex;
     width: max-content;
-    min-width: 200%;
     height: 126px;
     animation: clientLogoMarqueeMobile 24s linear infinite;
     will-change: transform;
