@@ -63,6 +63,7 @@ export interface WorkRecord {
   testimonial?: string | null;
   external_url?: string | null;
   embed_code?: string | null;
+  thumbnail_url?: string | null;
   sort_order?: number;
 }
 

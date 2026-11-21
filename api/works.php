@@ -167,9 +167,62 @@ class WorksManager {
         return $mimeMap[$mimeType] ?? 'jpg';
     }
 
+    private function getInstagramThumbnail($embedCode) {
+        if (empty($embedCode) || !preg_match(
+            '/https?:\/\/(?:www\.)?instagram\.com\/(?:reel|p|tv)\/[A-Za-z0-9_-]+/i',
+            $embedCode,
+            $matches
+        )) {
+            return null;
+        }
+
+        $url = rtrim($matches[0], '/');
+        if (!function_exists('curl_init')) {
+            return null;
+        }
+
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS => 3,
+            CURLOPT_TIMEOUT => 8,
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36',
+        ]);
+        $html = curl_exec($ch);
+        $status = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
+        curl_close($ch);
+
+        if ($status < 200 || $status >= 400 || empty($html)) {
+            return null;
+        }
+
+        if (preg_match('/<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)["\']/i', $html, $imageMatch) ||
+            preg_match('/<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:image["\']/i', $html, $imageMatch)) {
+            $thumbnail = html_entity_decode($imageMatch[1], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            return filter_var($thumbnail, FILTER_VALIDATE_URL) ? $thumbnail : null;
+        }
+
+        return null;
+    }
+
+    private function attachInstagramThumbnails($works) {
+        if (!is_array($works)) {
+            return $works;
+        }
+
+        foreach ($works as &$work) {
+            $work['thumbnail_url'] = $this->getInstagramThumbnail($work['embed_code'] ?? null);
+        }
+        unset($work);
+        return $works;
+    }
+
     // Get all works
     public function getAllWorks() {
-        return $this->db->fetchAll(
+        $works = $this->db->fetchAll(
             "SELECT works.*,
                     categories.slug AS category_slug,
                     categories.ar_name AS category_ar_name,
@@ -178,6 +231,7 @@ class WorksManager {
              LEFT JOIN categories ON categories.id = works.category_id
              ORDER BY works.created_at DESC"
         );
+        return $this->attachInstagramThumbnails($works);
     }
 
     private function validateCategory($categoryId) {
@@ -191,10 +245,14 @@ class WorksManager {
     // Get single work
     public function getWork($id) {
         $id = intval($id);
-        return $this->db->fetchOne(
+        $work = $this->db->fetchOne(
             "SELECT * FROM works WHERE id = ? LIMIT 1",
             [$id]
         );
+        if ($work) {
+            $work['thumbnail_url'] = $this->getInstagramThumbnail($work['embed_code'] ?? null);
+        }
+        return $work;
     }
 
     // Create work

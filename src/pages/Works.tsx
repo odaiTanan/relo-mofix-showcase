@@ -182,7 +182,7 @@ export default function WorksPage() {
                     src={
                       work.image_url
                         ? getImageUrl(work.image_url)
-                        : getInstagramThumbnailUrl(work.embed_code) || undefined
+                        : work.thumbnail_url || getInstagramThumbnailUrl(work.embed_code) || undefined
                     }
                     alt={isArabic ? work.ar_title : work.en_title}
                     loading="lazy"
@@ -314,7 +314,9 @@ export default function WorksPage() {
                       src={
                         selectedWork.image_url
                           ? getImageUrl(selectedWork.image_url)
-                          : getInstagramThumbnailUrl(selectedWork.embed_code) || undefined
+                          : selectedWork.thumbnail_url ||
+                            getInstagramThumbnailUrl(selectedWork.embed_code) ||
+                            undefined
                       }
                       alt=""
                       loading="lazy"

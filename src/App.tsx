@@ -428,7 +428,7 @@ function WorkPortfolio({
                 src={
                   work.image_url
                     ? getImageUrl(work.image_url)
-                    : getInstagramThumbnailUrl(work.embed_code) || undefined
+                    : work.thumbnail_url || getInstagramThumbnailUrl(work.embed_code) || undefined
                 }
                 alt={isArabic ? work.ar_title : work.en_title}
                 loading="lazy"
@@ -534,7 +534,9 @@ function WorkPortfolio({
                       src={
                         selectedWork.image_url
                           ? getImageUrl(selectedWork.image_url)
-                          : getInstagramThumbnailUrl(selectedWork.embed_code) || undefined
+                          : selectedWork.thumbnail_url ||
+                            getInstagramThumbnailUrl(selectedWork.embed_code) ||
+                            undefined
                       }
                       alt=""
                       onError={(event) => {
