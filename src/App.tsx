@@ -554,15 +554,17 @@ function ClientCarousel({ clients }: { clients: ClientLogo[] }) {
               <img src={getImageUrl(client.logo_url)} alt="شعار عميل" />
             </div>
           ))}
-          {clients.map((client) => (
-            <div
-              className="clients-carousel__slide clients-carousel__slide--duplicate"
-              key={`${client.id}-mobile-duplicate`}
-              aria-hidden="true"
-            >
-              <img src={getImageUrl(client.logo_url)} alt="" />
-            </div>
-          ))}
+          {[1, 2, 3].map((copy) =>
+            clients.map((client) => (
+              <div
+                className="clients-carousel__slide clients-carousel__slide--duplicate"
+                key={`${client.id}-mobile-duplicate-${copy}`}
+                aria-hidden="true"
+              >
+                <img src={getImageUrl(client.logo_url)} alt="" />
+              </div>
+            )),
+          )}
         </div>
       )}
     </div>
