@@ -1,12 +1,46 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, ArrowUpLeft, ExternalLink, Play, X } from "lucide-react";
+import { ArrowLeft, ArrowUpLeft, ChevronLeft, ChevronRight, ExternalLink, MessageCircle, Play, X } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import logoUrl from "../assets/relo-mofix-logo-new.png";
-import { api, Category, WorkRecord } from "../lib/api";
+import { api, WorkRecord } from "../lib/api";
 import { getInstagramUrls, getWorkCoverSources, resolveLocalImageUrl } from "../lib/work-media";
 import { WorkCoverImage } from "../components/WorkCoverImage";
 
-const PAGE_SIZE = 12;
+const WHATSAPP_NUMBER = "963997596503";
+
+const workFilters = [
+  { id: "all", ar: "الكل", en: "All" },
+  { id: "reels", ar: "فيديو وريلز", en: "Video & Reels" },
+  { id: "branding", ar: "هوية بصرية", en: "Brand Identity" },
+  { id: "design", ar: "تصميم", en: "Design" },
+  { id: "ads", ar: "إعلانات ممولة", en: "Paid Ads" },
+  { id: "digital", ar: "مواقع وتطبيقات", en: "Web & Apps" },
+] as const;
+
+function matchesWorkFilter(work: WorkRecord, filter: string) {
+  if (filter === "all") return true;
+  if (filter === "reels") return Boolean(work.embed_code?.trim());
+
+  const searchable = [
+    work.category_slug,
+    work.category_ar_name,
+    work.category_en_name,
+    work.ar_type,
+    work.en_type,
+    work.tag,
+  ].join(" ").toLowerCase();
+
+  if (filter === "branding") return /brand|هوية|identity|براند/.test(searchable);
+  if (filter === "design") return /design|تصميم|جرافيك|print|مطبوع/.test(searchable);
+  if (filter === "ads") return /ad|ads|اعلان|إعلان|ممولة|campaign/.test(searchable);
+  if (filter === "digital") return /web|site|website|app|موقع|تطبيق|ويب/.test(searchable);
+  return true;
+}
+
+function getWhatsAppUrl(projectName: string) {
+  const message = `مرحباً، بدي نفس شغل مشروع "${projectName}" لمشروعي.`;
+  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+}
 
 function getImageUrl(imageUrl: string | null | undefined) {
   if (!imageUrl) return logoUrl;
@@ -18,24 +52,17 @@ export default function WorksPage() {
   const { slug } = useParams();
   const [language, setLanguage] = useState<"ar" | "en">("ar");
   const [works, setWorks] = useState<WorkRecord[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
   const [filter, setFilter] = useState("all");
-  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [selectedWorkState, setSelectedWorkState] = useState<WorkRecord | null>(null);
 
   useEffect(() => {
     Promise.all([api.getWorks(), api.getCategories()])
-      .then(([worksResponse, categoriesResponse]) => {
+      .then(([worksResponse]) => {
         if (worksResponse.success) setWorks(worksResponse.data || []);
-        if (categoriesResponse.success) setCategories(categoriesResponse.data || []);
       })
       .finally(() => setLoading(false));
   }, []);
-
-  useEffect(() => {
-    setPage(1);
-  }, [filter]);
 
   useEffect(() => {
     document.documentElement.lang = language;
@@ -46,11 +73,9 @@ export default function WorksPage() {
     const sorted = works
       .slice()
       .sort((a, b) => Number(b.sort_order || 0) - Number(a.sort_order || 0));
-    return filter === "all" ? sorted : sorted.filter((work) => String(work.category_id) === filter);
+    return sorted.filter((work) => matchesWorkFilter(work, filter));
   }, [filter, works]);
 
-  const pageCount = Math.max(1, Math.ceil(filteredWorks.length / PAGE_SIZE));
-  const visibleWorks = filteredWorks.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
   const selectedWork =
     selectedWorkState ||
     (slug
@@ -82,6 +107,15 @@ export default function WorksPage() {
   const openModal = (work: WorkRecord) => {
     setSelectedWorkState(work);
     if (work.slug) navigate(`/works/${work.slug}`, { replace: false });
+  };
+  const navigateAdjacentWork = (direction: -1 | 1) => {
+    if (!selectedWork) return;
+    const currentIndex = filteredWorks.findIndex((work) => work.id === selectedWork.id);
+    const nextIndex = currentIndex + direction;
+    if (nextIndex < 0 || nextIndex >= filteredWorks.length) return;
+    const nextWork = filteredWorks[nextIndex];
+    setSelectedWorkState(nextWork);
+    if (nextWork.slug) navigate(`/works/${nextWork.slug}`, { replace: true });
   };
 
   const isArabic = language === "ar";
@@ -120,21 +154,14 @@ export default function WorksPage() {
 
       <section className="works-page-content">
         <div className="works-page-filters" role="group" aria-label="Work filters">
-          <button
-            type="button"
-            className={filter === "all" ? "active" : ""}
-            onClick={() => setFilter("all")}
-          >
-            {isArabic ? "الكل" : "All"}
-          </button>
-          {categories.map((category) => (
+          {workFilters.map((item) => (
             <button
               type="button"
-              key={category.id}
-              className={filter === String(category.id) ? "active" : ""}
-              onClick={() => setFilter(String(category.id))}
+              key={item.id}
+              className={filter === item.id ? "active" : ""}
+              onClick={() => setFilter(item.id)}
             >
-              {isArabic ? category.ar_name : category.en_name}
+              {isArabic ? item.ar : item.en}
             </button>
           ))}
         </div>
@@ -143,65 +170,46 @@ export default function WorksPage() {
           <div className="works-page-empty">
             {isArabic ? "جاري تحميل الأعمال..." : "Loading work..."}
           </div>
-        ) : visibleWorks.length === 0 ? (
+        ) : filteredWorks.length === 0 ? (
           <div className="works-page-empty">
             {isArabic ? "لا توجد أعمال في هذا التصنيف." : "No work in this category."}
           </div>
         ) : (
           <div className="work-grid works-page-grid">
-            {visibleWorks.map((work) => (
+            {filteredWorks.map((work) => (
               <button
                 type="button"
-                className="work-card work-card-button"
+                className="work-card work-card-button work-card--text"
                 key={work.id}
                 onClick={() => openModal(work)}
               >
-                <div className="work-visual work-visual--image">
-                  <WorkCoverImage
-                    sources={getWorkCoverSources(work, getImageUrl, logoUrl)}
-                    alt={isArabic ? work.ar_title : work.en_title}
-                  />
-                  {getInstagramUrls(work.embed_code).length > 0 && (
-                    <span className="work-card-play">
-                      <Play size={18} fill="currentColor" />
-                    </span>
-                  )}
-                </div>
-                <div className="work-card-meta">
-                  <span>{isArabic ? work.category_ar_name : work.category_en_name}</span>
-                  <h3>{isArabic ? work.ar_title : work.en_title}</h3>
+                <span className="work-text-card-number">
+                  {String(filteredWorks.indexOf(work) + 1).padStart(2, "0")}
+                </span>
+                <span className="work-card-tag">
+                  {isArabic
+                    ? work.category_ar_name || work.ar_type || "مشروع"
+                    : work.category_en_name || work.en_type || "Project"}
+                </span>
+                <h3>{isArabic ? work.ar_title : work.en_title}</h3>
+                <div className="work-card-result">
                   {work.result_value && (
                     <strong>
-                      {work.result_value} <small>{work.result_label}</small>
+                      {work.result_value}
                     </strong>
                   )}
-                  <ArrowUpLeft size={20} />
+                  {work.result_label && <small>{work.result_label}</small>}
                 </div>
+                {getInstagramUrls(work.embed_code).length > 0 ? (
+                  <span className="work-card-action" aria-label="تشغيل">
+                    <Play size={18} fill="currentColor" />
+                  </span>
+                ) : (
+                  <ArrowUpLeft className="work-card-action" size={20} />
+                )}
               </button>
             ))}
           </div>
-        )}
-
-        {pageCount > 1 && (
-          <nav className="works-pagination" aria-label="Pagination">
-            <button
-              type="button"
-              disabled={page === 1}
-              onClick={() => setPage((current) => Math.max(1, current - 1))}
-            >
-              {isArabic ? "السابق" : "Previous"}
-            </button>
-            <span>
-              {page} / {pageCount}
-            </span>
-            <button
-              type="button"
-              disabled={page === pageCount}
-              onClick={() => setPage((current) => Math.min(pageCount, current + 1))}
-            >
-              {isArabic ? "التالي" : "Next"}
-            </button>
-          </nav>
         )}
       </section>
 
@@ -226,6 +234,27 @@ export default function WorksPage() {
               aria-label={isArabic ? "إغلاق" : "Close"}
             >
               <X />
+            </button>
+            <button
+              type="button"
+              className="work-modal-nav work-modal-prev"
+              onClick={() => navigateAdjacentWork(-1)}
+              disabled={filteredWorks.findIndex((work) => work.id === selectedWork.id) <= 0}
+              aria-label={isArabic ? "المشروع السابق" : "Previous project"}
+            >
+              <ChevronRight />
+            </button>
+            <button
+              type="button"
+              className="work-modal-nav work-modal-next"
+              onClick={() => navigateAdjacentWork(1)}
+              disabled={
+                filteredWorks.findIndex((work) => work.id === selectedWork.id) >=
+                filteredWorks.length - 1
+              }
+              aria-label={isArabic ? "المشروع التالي" : "Next project"}
+            >
+              <ChevronLeft />
             </button>
             <div className="work-modal-content">
               <div>
@@ -254,6 +283,17 @@ export default function WorksPage() {
                   </p>
                 )}
                 {selectedWork.testimonial && <blockquote>{selectedWork.testimonial}</blockquote>}
+                <a
+                  className="work-whatsapp-button"
+                  href={getWhatsAppUrl(
+                    isArabic ? selectedWork.ar_title : selectedWork.en_title,
+                  )}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <MessageCircle size={20} />
+                  {isArabic ? "بدي نفس الشي لمشروعي" : "I want the same for my project"}
+                </a>
                 {selectedWork.external_url && (
                   <a
                     className="work-external-link"
