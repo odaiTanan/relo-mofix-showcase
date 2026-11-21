@@ -535,27 +535,73 @@ function ClientCarousel({ clients }: { clients: ClientLogo[] }) {
     return new URL(imageUrl, `${apiOrigin}/`).toString();
   };
 
+  const trackRef = useRef<HTMLDivElement>(null);
+  const setRef = useRef<HTMLDivElement>(null);
+  const offsetRef = useRef(0);
+  const pausedRef = useRef(false);
+
+  useEffect(() => {
+    const track = trackRef.current;
+    const set = setRef.current;
+    if (!track || !set || !clients.length) return;
+
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion) return;
+
+    let frame = 0;
+    let previousTime = performance.now();
+    const setWidth = () => set.scrollWidth;
+
+    const animate = (time: number) => {
+      const elapsed = Math.min(32, time - previousTime);
+      previousTime = time;
+      if (!pausedRef.current) {
+        const speed = window.innerWidth <= 620 ? 14 : 24;
+        offsetRef.current -= (speed * elapsed) / 1000;
+
+        const width = setWidth();
+        if (width > 0) {
+          while (offsetRef.current <= -width) offsetRef.current += width;
+        }
+        track.style.transform = `translate3d(${offsetRef.current}px, 0, 0)`;
+      }
+      frame = window.requestAnimationFrame(animate);
+    };
+
+    frame = window.requestAnimationFrame(animate);
+    return () => window.cancelAnimationFrame(frame);
+  }, [clients]);
+
   return (
     <div className="clients-carousel" aria-label="شعارات العملاء">
       {clients.length > 0 && (
-        <div className="clients-carousel__track">
-          {clients.map((client) => (
-            <div className="clients-carousel__slide" key={client.id}>
-              <img
-                src={getImageUrl(client.logo_url)}
-                alt="شعار عميل"
-                loading="lazy"
-                decoding="async"
-              />
-            </div>
-          ))}
-          {clients.map((client) => (
+        <div
+          className="clients-carousel__track"
+          ref={trackRef}
+          onPointerEnter={() => {
+            pausedRef.current = true;
+          }}
+          onPointerLeave={() => {
+            pausedRef.current = false;
+          }}
+        >
+          {[0, 1, 2, 3].map((setIndex) => (
             <div
-              className="clients-carousel__slide clients-carousel__slide--duplicate"
-              key={`${client.id}-duplicate`}
-              aria-hidden="true"
+              className="clients-carousel__set"
+              key={setIndex}
+              ref={setIndex === 0 ? setRef : undefined}
+              aria-hidden={setIndex > 0 ? true : undefined}
             >
-              <img src={getImageUrl(client.logo_url)} alt="" loading="lazy" decoding="async" />
+              {clients.map((client) => (
+                <div className="clients-carousel__slide" key={`${setIndex}-${client.id}`}>
+                  <img
+                    src={getImageUrl(client.logo_url)}
+                    alt={setIndex === 0 ? "شعار عميل" : ""}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+              ))}
             </div>
           ))}
         </div>

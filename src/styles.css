@@ -1159,8 +1159,12 @@ button {
   width: max-content;
   height: 150px;
   direction: ltr;
-  animation: clientLogoMarquee 36s linear infinite;
   will-change: transform;
+}
+.clients-carousel__set {
+  display: flex;
+  flex: 0 0 auto;
+  width: max-content;
 }
 .clients-carousel__slide {
   flex: 0 0 clamp(210px, 19vw, 260px);
@@ -1169,9 +1173,6 @@ button {
   display: grid;
   place-items: center;
   padding: 24px 36px;
-}
-.clients-carousel__slide--duplicate {
-  display: grid;
 }
 .clients-carousel__slide img {
   width: 100%;
@@ -1191,9 +1192,6 @@ button {
 }
 .clients-carousel__slide img:hover {
   transform: scale(1.04);
-}
-.clients-carousel:hover .clients-carousel__track {
-  animation-play-state: paused;
 }
 .testimonials-section {
   background: var(--secondary);
@@ -2679,7 +2677,6 @@ footer a {
 @media (max-width: 620px) {
   .clients-carousel__track {
     height: 118px;
-    animation-duration: 30s;
   }
   .clients-carousel__slide {
     flex-basis: 170px;
