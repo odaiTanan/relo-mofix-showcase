@@ -1524,6 +1524,15 @@ footer a {
     transform: translate3d(-100%, 0, 0);
   }
 }
+/* Mobile: travel distance = n × slot width so logos never stack on narrow screens */
+@keyframes clientLogoTravelMobile {
+  from {
+    transform: translate3d(var(--clients-ticker-distance, 100vw), 0, 0);
+  }
+  to {
+    transform: translate3d(-100%, 0, 0);
+  }
+}
 
 .admin-shell {
   min-height: 100svh;
@@ -2679,14 +2688,14 @@ footer a {
     overflow: hidden;
   }
   .clients-carousel__slide {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 260px;
-    padding: 24px 65px;
+    /* Keep absolute + staggered delays (same as desktop); only shrink slot + path */
+    width: 160px;
+    padding: 18px 12px;
+    animation-name: clientLogoTravelMobile;
   }
   .clients-carousel__slide img {
-    width: 130px;
+    width: 120px;
+    height: 64px;
   }
   .hero {
     min-height: 100svh;

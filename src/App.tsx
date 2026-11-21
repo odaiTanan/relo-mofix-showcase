@@ -536,9 +536,19 @@ function ClientCarousel({ clients }: { clients: ClientLogo[] }) {
   };
 
   const tickerDuration = 28;
+  // Must match mobile slide width in CSS — spaces logos by slot size, not viewport.
+  const mobileSlotPx = 160;
 
   return (
-    <div className="clients-carousel" aria-label="شعارات العملاء">
+    <div
+      className="clients-carousel"
+      aria-label="شعارات العملاء"
+      style={
+        {
+          "--clients-ticker-distance": `${Math.max(clients.length, 1) * mobileSlotPx}px`,
+        } as React.CSSProperties
+      }
+    >
       {clients.length > 0 && (
         <div className="clients-carousel__track">
           {clients.map((client, index) => (
