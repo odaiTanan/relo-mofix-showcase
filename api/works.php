@@ -216,62 +216,17 @@ class WorksManager {
         return null;
     }
 
-    private function getInstagramShortcode($embedCode) {
+    private function getInstagramThumbnail($embedCode) {
         if (empty($embedCode) || !preg_match(
-            '/instagram\.com\/(?:reel|p|tv)\/([A-Za-z0-9_-]+)/i',
+            '/https?:\/\/(?:www\.)?instagram\.com\/(?:reel|p|tv)\/[A-Za-z0-9_-]+/i',
             $embedCode,
             $matches
         )) {
             return null;
         }
-        return $matches[1];
-    }
 
-    private function getCachedThumbnailPath($shortcode) {
-        $dir = UPLOAD_DIR . '/ig-thumbs';
-        if (!is_dir($dir)) {
-            @mkdir($dir, 0755, true);
-        }
-        foreach (['jpg', 'jpeg', 'png', 'webp'] as $ext) {
-            $path = $dir . '/' . $shortcode . '.' . $ext;
-            if (is_file($path) && filesize($path) > 500) {
-                return '/uploads/ig-thumbs/' . $shortcode . '.' . $ext;
-            }
-        }
-        return null;
-    }
+        $url = rtrim($matches[0], '/');
 
-    private function cacheRemoteThumbnail($remoteUrl, $shortcode) {
-        $cached = $this->getCachedThumbnailPath($shortcode);
-        if ($cached) {
-            return $cached;
-        }
-
-        $response = $this->curlGet($remoteUrl);
-        if (!$response || $response['status'] < 200 || $response['status'] >= 400 || empty($response['body'])) {
-            return null;
-        }
-
-        $finfo = new finfo(FILEINFO_MIME_TYPE);
-        $mime = $finfo->buffer($response['body']);
-        if (!in_array($mime, ALLOWED_TYPES, true)) {
-            return null;
-        }
-
-        $ext = $this->getExtensionFromMime($mime);
-        $dir = UPLOAD_DIR . '/ig-thumbs';
-        if (!is_dir($dir)) {
-            @mkdir($dir, 0755, true);
-        }
-        $path = $dir . '/' . $shortcode . '.' . $ext;
-        if (@file_put_contents($path, $response['body']) === false) {
-            return null;
-        }
-        @chmod($path, 0644);
-        return '/uploads/ig-thumbs/' . $shortcode . '.' . $ext;
-    }
-
-    private function resolveRemoteInstagramThumbnail($url) {
         // 1) Follow /media/?size=l redirect to CDN image
         $media = $this->curlGet($url . '/media/?size=l');
         if ($media && !empty($media['effective'])) {
@@ -303,36 +258,6 @@ class WorksManager {
         }
 
         return null;
-    }
-
-    private function getInstagramThumbnail($embedCode) {
-        $shortcode = $this->getInstagramShortcode($embedCode);
-        if (!$shortcode) {
-            return null;
-        }
-
-        // Prefer a locally cached copy — browser can load our domain, not Instagram CDN
-        $cached = $this->getCachedThumbnailPath($shortcode);
-        if ($cached) {
-            return $cached;
-        }
-
-        if (!preg_match(
-            '/https?:\/\/(?:www\.)?instagram\.com\/(?:reel|p|tv)\/[A-Za-z0-9_-]+/i',
-            $embedCode,
-            $matches
-        )) {
-            return null;
-        }
-
-        $url = rtrim($matches[0], '/');
-        $remote = $this->resolveRemoteInstagramThumbnail($url);
-        if (!$remote) {
-            return null;
-        }
-
-        $local = $this->cacheRemoteThumbnail($remote, $shortcode);
-        return $local ?: $remote;
     }
 
     private function attachInstagramThumbnails($works) {

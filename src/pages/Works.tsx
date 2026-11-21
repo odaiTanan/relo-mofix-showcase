@@ -160,7 +160,6 @@ export default function WorksPage() {
                   <WorkCoverImage
                     sources={getWorkCoverSources(work, getImageUrl)}
                     alt={isArabic ? work.ar_title : work.en_title}
-                    embedUrl={getInstagramUrls(work.embed_code)[0]}
                   />
                   {getInstagramUrls(work.embed_code).length > 0 && (
                     <span className="work-card-play">
